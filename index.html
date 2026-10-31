@@ -628,7 +628,7 @@ function renderPrefs(){
     <div class="chips">${["Unfurnished","Semi furnished","Fully furnished"].map(f=>`<label class="chip"><input type="checkbox" data-furn="${f}" ${(pr.furnishing||[]).includes(f)?"checked":""} ${ro?"disabled":""}> ${f}</label>`).join("")}</div>
     <label class="f">Amenities wanted</label>
     <div class="chips">${["Gated community","Lift","Covered parking","Reliable water","Security","Balcony","No brokerage","Lower deposit"].map(f=>`<label class="chip"><input type="checkbox" data-amen="${f}" ${(pr.amenities||[]).includes(f)?"checked":""} ${ro?"disabled":""}> ${f}</label>`).join("")}</div>
-    ${ro?"":`<div class="actions"><button class="primary" id="savePrefs">Save preferences</button></div>`}
+    ${ro?"":`<div class="actions"><button class="primary" id="savePrefs">Save preferences</button><span id="runSlot" style="display:contents"></span></div><div id="runMsgSlot"></div>`}
   </div>
   <div class="panel small">
     <b>Workplace</b>
@@ -676,7 +676,7 @@ async function savePrefs(){
   const data={...S.prefs, ...patch};
   const {error}=await S.sb.from("prefs").update({data, updated_at:new Date().toISOString()}).eq("id",1);
   if(error) return toast("Couldn't save preferences. Try again.");
-  S.prefs=data; S.prefsDirty=false; toast("Preferences saved"); render();
+  S.prefs=data; S.prefsDirty=false; toast("Preferences saved"); render(); return true;
 }
 
 // ---------- report ----------
@@ -721,13 +721,7 @@ function renderHome(){
        ${st.lastError?`<div class="banner bad" style="margin:8px 0 0">${esc(st.lastError)}</div>`:""}
        <div class="muted" style="margin-top:6px">Sources: ${esc((st.sources||[]).join(", ")||"–")}</div>`;
   }
-  if(S.canWrite){
-    const busy=S.runState==="sending"||S.runState==="running";
-    h+=`<div class="actions" style="margin-top:10px"><button class="primary" id="runNowBtn" ${busy?"disabled":""}>${S.runState==="sending"?"Starting…":S.runState==="running"?"Search running…":"Run search now"}</button></div>
-      ${S.runMsg?`<div class="small ${S.runState==="error"?"":"muted"}" style="margin-top:6px">${esc(S.runMsg)}</div>`:""}`;
-  }
   $("#statusPanel").innerHTML=h;
-  const rb=$("#runNowBtn"); if(rb) rb.onclick=runNow;
   const newOnes=evals.filter(x=>isNew(x.p) && !(S.marks[x.p.id]||{}).rejected).sort((a,b)=>b.e.score-a.e.score).slice(0,5);
   const best = newOnes.length? newOnes : evals.filter(x=>x.e.majorOk && !(S.marks[x.p.id]||{}).rejected).sort((a,b)=>b.e.score-a.e.score).slice(0,5);
   $("#homeNew").innerHTML = !S.loaded.props? `<div class="empty">Loading listings…</div>` :
@@ -749,8 +743,16 @@ function renderShortlist(){
   const ids=Object.keys(S.shortlist); const arr=ids.map(id=>S.props.find(p=>p.id===id)).filter(Boolean);
   $("#favList").innerHTML = arr.length? sorted(arr).map(x=>cardHTML(x.p,x.e)).join("") : `<div class="empty">Nothing shortlisted yet. Tap ☆ Shortlist on a listing.</div>`;
 }
+function renderRun(){
+  const slot=$("#runSlot"), msg=$("#runMsgSlot"); if(!slot) return;
+  if(!S.canWrite){ slot.innerHTML=""; msg.innerHTML=""; return; }
+  const busy=S.runState==="sending"||S.runState==="running";
+  slot.innerHTML=`<button id="runNowBtn" ${busy?"disabled":""}>${S.runState==="sending"?"Starting…":S.runState==="running"?"Search running…":"Run search now"}</button>`;
+  msg.innerHTML=S.runMsg?`<p class="small ${S.runState==="error"?"":"muted"}" style="margin:6px 0 0">${esc(S.runMsg)}</p>`:`<p class="small muted" style="margin:6px 0 0">Run search now uses your saved preferences (unsaved changes are saved first).</p>`;
+  $("#runNowBtn").onclick=async()=>{ if(S.prefsDirty){ const ok=await savePrefs(); if(!ok) return; } runNow(); };
+}
 let rq=false;
-function render(){ if(rq) return; rq=true; requestAnimationFrame(()=>{ rq=false; renderHome(); renderList(); renderShortlist(); renderReport(); renderPrefs(); }); }
+function render(){ if(rq) return; rq=true; requestAnimationFrame(()=>{ rq=false; renderHome(); renderList(); renderShortlist(); renderReport(); renderPrefs(); renderRun(); }); }
 render();
 
 // ---------- data wiring ----------
