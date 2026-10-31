@@ -32,11 +32,18 @@ main{padding:16px 16px calc(env(safe-area-inset-bottom) + 30px);max-width:850px;
 .pin.sel{background:var(--fav);border-color:var(--fav);color:#fff;z-index:1000}
 .office{background:#1f4fb8;color:#fff;border:2px solid #fff;border-radius:999px;padding:5px 9px;font:700 12px/1.2 system-ui,sans-serif;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.35);transform:translate(-50%,-100%);display:inline-block;cursor:grab}
 .leaflet-div-icon{background:none;border:0}
+.mpills{display:flex;align-items:center;gap:6px;margin:0 0 6px}
+.pills{display:flex;gap:4px;overflow-x:auto;flex:1 1 auto;scrollbar-width:none;padding:2px}
+.pills::-webkit-scrollbar{display:none}
+.pill{flex:0 0 auto;display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:6px 6px;font-size:12px;font-weight:600;min-height:36px}
+.pill .n{background:#eef2ef;color:#5b6f67;border-radius:6px;padding:1px 4px;font-size:11px}
+.pill.on{border-color:var(--brand);background:var(--brand-soft);color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand)}
+.pill.on .n{background:#fff}
 .msearch{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px 4px 4px 12px;margin:0 0 6px;box-shadow:0 2px 8px rgba(0,0,0,.06);color:#6b7c75}
 .msearch input{border:0;padding:8px 0;flex:1 1 auto;min-width:0;background:none}
 .msearch input:focus{outline:none}
 #mfN{font-size:13px;white-space:nowrap}
-#mfBtn{background:none;border:0;color:var(--ink);position:relative;min-width:44px}
+#mfBtn{color:var(--ink);position:relative;min-width:40px;padding:8px}
 #mfCount:not(:empty){position:absolute;top:2px;right:2px;margin:0}
 #mfSheet{z-index:3000}
 .opt.radio input{display:none}
@@ -202,14 +209,12 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
   </section>
 
   <section class="view" id="v-map">
-    <div class="msearch">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="mfQ" type="search" placeholder="Search society, area or title" aria-label="Search listings on the map" autocomplete="off">
-      <span id="mfN" class="muted"></span>
-      <button id="mfBtn" type="button" aria-label="Filters" aria-haspopup="dialog"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg><span id="mfCount"></span></button>
+    <div class="mpills">
+      <div class="pills" id="mfPills" role="tablist" aria-label="Quick filters"></div>
     </div>
     <div class="mapbar" style="margin-top:-2px">
       <span class="small muted" id="mapStatus" style="flex:1 1 auto">Loading map…</span>
+      <button id="mfBtn" type="button" title="More filters" aria-label="More filters" aria-haspopup="dialog"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg><span id="mfCount"></span></button>
       <button id="mapRecenter" type="button" aria-label="Fit all pins" title="Fit all pins">⤢</button>
       <button id="mapOfficeBtn" type="button" aria-label="Show offices" title="Show offices">🏢</button>
       <button id="mapSaveOffice" type="button" style="display:none;flex:0 0 auto" class="primary">Save office pins</button>
@@ -246,7 +251,6 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
 
 <div class="sheet" id="mfSheet" role="dialog" aria-modal="true" aria-labelledby="mfTitle"><div class="inner">
   <div style="display:flex;align-items:center;justify-content:space-between"><h3 id="mfTitle">Filter map</h3><button type="button" id="mfClear" style="border:0;background:none">Clear all</button></div>
-  <label class="f">Show</label><div class="opts" id="mfgShow"></div>
   <label class="f">Distance by road</label><div class="opts three" id="mfgDist"></div>
   <label class="f">From office</label><div class="opts" id="mfgFrom"></div>
   <label class="f">Rent</label><div class="opts three" id="mfgRent"></div>
@@ -967,8 +971,21 @@ function mfGroup(el,key,opts,def){
   el.innerHTML=opts.map(([v,l])=>`<label class="opt radio ${cur===v?"on":""}"><input type="radio" name="mf_${key}" value="${esc(v)}" ${cur===v?"checked":""}>${esc(l)}</label>`).join("");
   el.querySelectorAll("input").forEach(i=>i.onchange=()=>{ MF[key]=i.value; mfApply(); });
 }
+function mapBase(){ // all non-show filters
+  let arr=geoPool();
+  if(MF.rent){ const [lo,hi]=MF.rent.split("-").map(x=>x===""?null:+x); arr=arr.filter(p=>typeof p.rent==="number" && (lo==null||p.rent>=lo) && (hi==null||p.rent<=hi)); }
+  if(MF.dist){ const max=+MF.dist; const offs=offices().filter(o=>!MF.from||MF.from==="any"||o.id===MF.from);
+    arr=arr.filter(p=>offs.some(o=>{ const km=roadKm(p,o); return km!=null && km<=max; })); }
+  return arr;
+}
+function renderPills(){
+  const el=$("#mfPills"); if(!el) return; const base=mapBase(); const rej=p=>!!(S.marks[p.id]||{}).rejected;
+  const defs=[["all","All",base.filter(p=>!rej(p)).length],["short","Fav ♥️",base.filter(p=>!rej(p)&&S.shortlist[p.id]).length],["rej","Rejected ❌",base.filter(rej).length],["match","Match ✅",base.filter(p=>!rej(p)&&evaluate(p).majorOk).length]];
+  const cur=MF.show||"all";
+  el.innerHTML=defs.map(([v,l,n])=>`<button type="button" role="tab" aria-selected="${cur===v}" class="pill ${cur===v?"on":""}" data-pill="${v}">${l}<span class="n">${String(n).padStart(2,"0")}</span></button>`).join("");
+  el.querySelectorAll("[data-pill]").forEach(b=>b.onclick=()=>{ MF.show=b.dataset.pill; mfApply(); fitAll(); });
+}
 function mfRenderSheet(){
-  mfGroup($("#mfgShow"),"show",MF_OPTS.show,"all");
   mfGroup($("#mfgDist"),"dist",MF_OPTS.dist,"");
   mfGroup($("#mfgFrom"),"from",[["any","Any office"],...offices().map(o=>[o.id,o.short||o.name])],"any");
   mfGroup($("#mfgRent"),"rent",MF_OPTS.rent,"");
@@ -977,23 +994,22 @@ function mfRenderSheet(){
 }
 function mfApply(){
   mfSave(); mfRenderSheet();
-  const n=[MF.show&&MF.show!=="all",MF.dist,MF.rent].filter(Boolean).length; $("#mfCount").textContent=n?String(n):"";
+  const n=[MF.dist,MF.rent].filter(Boolean).length; $("#mfCount").textContent=n?String(n):""; renderPills();
   if(MAP.sel && !mapList().some(p=>p.id===MAP.sel)){ $("#mapCard").classList.remove("on"); MAP.sel=null; }
   drawPins(); mapCount();
 }
 function wireMapFilters(){
-  const q=$("#mfQ"); q.value=MF.q||"";
-  let t=null; q.oninput=()=>{ clearTimeout(t); t=setTimeout(()=>{ MF.q=q.value.trim(); mfApply(); },200); };
+  MF.q="";
   const sh=$("#mfSheet");
   $("#mfBtn").onclick=()=>{ mfRenderSheet(); sh.classList.add("on"); };
   $("#mfDone").onclick=()=>{ sh.classList.remove("on"); fitAll(); };
   sh.onclick=e=>{ if(e.target===sh) sh.classList.remove("on"); };
-  $("#mfClear").onclick=()=>{ MF.show="all"; MF.dist=""; MF.rent=""; MF.from="any"; mfApply(); };
+  $("#mfClear").onclick=()=>{ MF.dist=""; MF.rent=""; MF.from="any"; mfApply(); };
   mfApply();
 }
 function mapCount(){ if(MAP.busy||MAP.dirtyOffice) return; const n=mapList().filter(p=>GEO["L:"+p.id]).length;
   const pending=MF.dist && geoPool().some(p=>GEO["L:"+p.id] && offices().some(o=>roadKm(p,o)==null));
-  const tot=geoPool().filter(p=>!(S.marks[p.id]||{}).rejected).length; $("#mfN").textContent=`${mapList().length}/${tot}`;
+  const tot=geoPool().filter(p=>!(S.marks[p.id]||{}).rejected).length; void tot; renderPills();
   $("#mapStatus").textContent=`${n} listing${n===1?"":"s"} on the map${pending?" · calculating road distances…":""}`; }
 function drawPins(){
   if(!MAP.map) return;
