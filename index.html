@@ -106,14 +106,15 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
 </header>
 <main>
   <div id="globalMsg"></div>
+  <div id="viewBar" class="banner warn" style="display:none">View only. <a href="#" id="editLink">Enter passcode to edit</a> (shortlist, comments, votes, notes, preferences).</div>
   <section id="codeView" class="panel" style="display:none">
     <h2 style="margin-top:0">Enter passcode</h2>
-    <p class="small muted">This dashboard is private. Enter the passcode to open it. You'll only need to do this once on each device.</p>
+    <p class="small muted">Anyone can view. Enter the passcode to shortlist, comment, vote, keep notes or change preferences. You'll only need to do this once on each device.</p>
     <form id="codeForm"><label class="f" for="codeInput">Passcode</label>
       <input id="codeInput" type="password" inputmode="numeric" autocomplete="current-password" required>
       <label class="f" for="nameInput">Your name (shown on comments and votes)</label>
       <input id="nameInput" maxlength="40" autocomplete="given-name" placeholder="e.g. Jai">
-      <div class="actions"><button class="primary" type="submit" id="codeBtn">Open dashboard</button></div></form>
+      <div class="actions"><button class="primary" type="submit" id="codeBtn">Unlock editing</button><button type="button" id="codeClose">Not now</button></div></form>
     <p class="small muted" id="codeMsg"></p>
   </section>
 
@@ -539,14 +540,18 @@ function renderPrefs(){
     <table class="rep">${commuteRows}</table>
   </div>
   <div class="panel small">
-    <b>This device</b>
+    ${!S.canWrite?`<b>Editing</b>
+    <p class="muted" style="margin:4px 0 8px">You're in view-only mode. Enter the passcode to shortlist, comment, vote, keep notes or change preferences.</p>
+    <div class="actions"><button class="primary" id="unlockBtn">Enter passcode</button></div>
+  </div>`:`<b>This device</b>
     <p class="muted" style="margin:4px 0 8px">Anyone with the passcode can view and edit the dashboard, shortlist, comments and votes. Notes and "contacted / rejected" marks are kept per device.</p>
     <label class="f" for="myName">Your name</label>
     <div class="cmtform"><input id="myName" maxlength="40" value="${esc(S.email||"")}"><button id="saveName" type="button">Save</button></div>
     <div class="actions"><button id="lockBtn">Lock this device</button></div>
-  </div>`;
+  </div>`}`;
   const sp=$("#savePrefs"); if(sp) sp.onclick=savePrefs;
   const sn=$("#saveName"); if(sn) sn.onclick=()=>{ const n=$("#myName").value.trim().slice(0,40)||"Guest"; S.email=n; ls.set("fmh_name",n); toast("Name saved"); render(); };
+  const ub=$("#unlockBtn"); if(ub) ub.onclick=showCode;
   const lk=$("#lockBtn"); if(lk) lk.onclick=()=>{ ls.del("fmh_code"); location.hash=""; location.reload(); };
 }
 async function savePrefs(){
@@ -655,12 +660,13 @@ async function loadVotes(){ const {data}=await S.sb.from("votes").select("*"); c
 async function loadMembers(){ const {data}=await S.sb.from("members").select("*").order("added_at"); S.members=data||[]; render(); }
 const ls={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v)}catch{}},del(k){try{localStorage.removeItem(k)}catch{}}};
 function deviceId(){ let id=ls.get("fmh_device"); if(!id){ id=(crypto.randomUUID?crypto.randomUUID():"10000000-1000-4000-8000-100000000000".replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16))); ls.set("fmh_device",id); } return id; }
+function showCode(){ $("#codeView").style.display=""; window.scrollTo({top:0,behavior:"smooth"}); }
 async function startOpen(code){
   const cfg=window.FMH_CONFIG||{};
   S.sb=window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}, global:{headers:{"x-passcode":code}}});
   S.uid=deviceId(); S.email=ls.get("fmh_name")||"Guest";
   S.member=true; S.canWrite=true; S.isOwner=true;
-  $("#codeView").style.display="none"; showApp(true); route();
+  $("#codeView").style.display="none"; $("#viewBar").style.display="none"; showApp(true); route();
   await Promise.all([loadListings(), loadPrefs(), loadShortlist(), loadMarks(), loadComments(), loadVotes()]);
   const refresh=()=>{ if(document.visibilityState==="visible") Promise.all([loadShortlist(),loadComments(),loadVotes()]); };
   document.addEventListener("visibilitychange", refresh); setInterval(refresh, 60000);
@@ -669,12 +675,16 @@ async function startOpen(code){
 (async()=>{
   const cfg=window.FMH_CONFIG||{};
   showApp(false);
-  if(!window.supabase || !cfg.supabaseUrl){ showGlobal("Couldn't reach the data service. Check your connection and reload.","bad"); return; }
+  if(!window.supabase || !cfg.supabaseUrl){ showApp(true); route(); loadListings(); S.loaded.prefs=true; render(); showGlobal("View only: couldn't reach the editing service.","warn"); return; }
   const probe=window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
   const check=async c=>{ const {data,error}=await probe.rpc("check_passcode",{p:c}); if(error) throw error; return data===true; };
   const saved=ls.get("fmh_code");
   if(saved){ try{ if(await check(saved)) return startOpen(saved); ls.del("fmh_code"); }catch(e){ return startOpen(saved); } }
-  $("#codeView").style.display="";
+  S.sb=probe; S.canWrite=false; S.member=false; S.isOwner=false;
+  showApp(true); route(); $("#viewBar").style.display="";
+  $("#editLink").onclick=e=>{ e.preventDefault(); showCode(); };
+  $("#codeClose").onclick=()=>{ $("#codeView").style.display="none"; };
+  Promise.all([loadListings(), loadPrefs()]);
   const nm=ls.get("fmh_name"); if(nm) $("#nameInput").value=nm;
   $("#codeForm").onsubmit=async e=>{ e.preventDefault(); const c=$("#codeInput").value.trim(); if(!c) return;
     $("#codeBtn").disabled=true; $("#codeMsg").textContent="Checking…";
