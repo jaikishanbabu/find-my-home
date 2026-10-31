@@ -913,7 +913,7 @@ async function roadAll(){
           if(!res.ok) { await sleep(1500); continue; }
           const j=await res.json(); const row=(j.distances||[])[0]||[];
           chunk.forEach((p,k)=>{ const m=row[k+1]; if(typeof m==="number") ROAD[p.id+"|"+o.id]={km:m/1000,s:roadSig(o,GEO["L:"+p.id])}; });
-          roadSave(); render();
+          roadSave(); chunk.forEach(p=>queuePush(p.id)); render();
         }catch{}
         await sleep(1100);
       }
@@ -1039,7 +1039,7 @@ function selectPin(id){
     <div class="actions"><a class="btn primary" href="${esc(p.url)}" target="_blank" rel="noopener">Open listing ↗</a>${S.canWrite?`<button data-mfav="1">${S.shortlist[p.id]?"★ Shortlisted":"☆ Shortlist"}</button><button data-reject="${esc(p.id)}">${(S.marks[p.id]||{}).rejected?"↺ Restore":"Reject"}</button>`:""}</div></div>`;
   el.classList.add("on");
   $("#mcClose").onclick=()=>{ el.classList.remove("on"); MAP.sel=null; drawPins(); };
-  if(g) offs.forEach(o=>{ if(roadKm(p,o)!=null) return; roadDist(g,o).then(km=>{ if(km==null) return; ROAD[p.id+"|"+o.id]={km,s:roadSig(o,g)}; roadSave();
+  if(g) offs.forEach(o=>{ if(roadKm(p,o)!=null) return; roadDist(g,o).then(km=>{ if(km==null) return; ROAD[p.id+"|"+o.id]={km,s:roadSig(o,g)}; roadSave(); queuePush(p.id);
     const r=el.querySelector(`[data-road="${o.id}"]`); if(r&&MAP.sel===id) r.textContent=`${o.short||o.name}: ${km.toFixed(1)} km by road`; }); });
   const rj=el.querySelector("[data-reject]"); if(rj) rj.onclick=()=>{ const was=!!(S.marks[p.id]||{}).rejected; saveMark(p.id,{rejected:!was}); toast(was?"Restored":"Rejected");
     if(!mapList().some(x=>x.id===id)){ el.classList.remove("on"); MAP.sel=null; drawPins(); } else selectPin(id); mapCount(); };
@@ -1076,15 +1076,37 @@ function fitAll(){
   const pts=mapList().map(p=>GEO["L:"+p.id]).filter(Boolean).map(g=>[g.lat,g.lon]); offices().forEach(o=>pts.push([o.lat,o.lon]));
   if(pts.length>1) MAP.map.fitBounds(pts,{padding:[30,30],maxZoom:15}); else { const o=officePos(); MAP.map.setView([o.lat,o.lon],13); }
 }
+// Shared cache: pins and road distances are stored in the database once, so every device loads them instantly.
+let sharedLoaded=false; const pushQ=new Set(); let pushT=null;
+async function loadShared(){
+  if(sharedLoaded || !S.sb) return; 
+  try{ const {data,error}=await S.sb.from("geo_cache").select("prop_id,lat,lon,q,road").limit(5000);
+    if(error||!data) return;
+    const have=new Set(data.map(r=>r.prop_id));
+    for(const r of data){ GEO["L:"+r.prop_id]={lat:r.lat,lon:r.lon,q:r.q||"address"};
+      for(const [oid,v] of Object.entries(r.road||{})) if(v && typeof v.km==="number") ROAD[r.prop_id+"|"+oid]=v; }
+    sharedLoaded=true; geoSave(); roadSave();
+    geoPool().forEach(p=>{ if(GEO["L:"+p.id] && !have.has(p.id)) queuePush(p.id); }); render(); if(MAP.map){ drawPins(); if(!MAP.fitted){ fitAll(); MAP.fitted=true; } }
+  }catch{}
+}
+function queuePush(id){ if(!S.canWrite) return; pushQ.add(id); clearTimeout(pushT); pushT=setTimeout(flushPush,1500); }
+async function flushPush(){
+  if(!S.canWrite||!pushQ.size) return; const ids=[...pushQ]; pushQ.clear();
+  const rows=ids.map(id=>{ const g=GEO["L:"+id]; if(!g) return null; const road={};
+    for(const o of offices()){ const e=ROAD[id+"|"+o.id]; if(e) road[o.id]=e; }
+    return {prop_id:id,lat:g.lat,lon:g.lon,q:g.q||"address",road,updated_at:new Date().toISOString()}; }).filter(Boolean);
+  for(let i=0;i<rows.length;i+=100){ try{ await S.sb.from("geo_cache").upsert(rows.slice(i,i+100)); }catch{} }
+}
 async function geocodeAll(){
   if(MAP.busy) return; MAP.busy=true;
+  await loadShared();
   const todo=geoPool().filter(p=>!GEO["L:"+p.id]);
-  let n=0;
-  for(const p of todo){
-    n++; $("#mapStatus").textContent=`Placing listings on the map… ${n}/${todo.length}`;
-    try{ await geocodeListing(p); }catch{}
-    if(n%5===0) drawPins();
-  }
+  let n=0, i=0;
+  const worker=async()=>{ while(i<todo.length){ const p=todo[i++];
+    try{ if(await geocodeListing(p)) queuePush(p.id); }catch{}
+    n++; $("#mapStatus").textContent=`Placing new listings on the map… ${n}/${todo.length}`;
+    if(n%4===0) drawPins(); } };
+  await Promise.all([worker(),worker()]);
   MAP.busy=false; drawPins(); roadAll();
   mapCount();
   if(todo.length) { render(); if(MAP.map && !MAP.fitted){ fitAll(); MAP.fitted=true; } }
@@ -1118,7 +1140,7 @@ async function loadListings(){
   try{
     const [l,m]=await Promise.all([fetchJSON("data/listings.json"), fetchJSON("data/meta.json")]);
     S.props=l.listings||[]; S.status=m.status||null; S.runs=m.runs||[]; S.loaded.props=true; showGlobal("");
-    setTimeout(()=>{ try{ geocodeAll(); }catch{} }, 1500);
+    setTimeout(()=>{ try{ geocodeAll(); }catch{} }, 300);
   }catch(e){ S.loaded.props=true; showGlobal("Couldn't load listings. Check your connection and reopen the page.","bad"); }
   render();
 }
