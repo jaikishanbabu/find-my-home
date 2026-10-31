@@ -80,6 +80,8 @@ button.primary,.btn.primary{background:var(--brand);color:#fff;border-color:var(
 .actions .btn.primary{flex:1 1 100%}
 button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
 button:disabled{opacity:.5}
+button[data-act="rejected"],button[data-reject]{background:var(--bad-soft);color:var(--bad);border-color:#f3c4bd}
+button[data-act="rejected"].on{background:var(--bad);color:#fff;border-color:var(--bad)}
 textarea,input,select{font:inherit;font-size:16px;width:100%;padding:11px 10px;border:1px solid #d8e2dc;border-radius:10px;background:#fff;color:var(--ink)}
 textarea{min-height:80px}
 label.f{display:block;font-size:12px;font-weight:650;color:#496159;margin:12px 0 5px}
