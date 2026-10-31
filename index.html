@@ -32,6 +32,11 @@ main{padding:16px 16px calc(env(safe-area-inset-bottom) + 30px);max-width:850px;
 .pin.sel{background:var(--fav);border-color:var(--fav);color:#fff;z-index:1000}
 .office{background:#1f4fb8;color:#fff;border:2px solid #fff;border-radius:999px;padding:5px 9px;font:700 12px/1.2 system-ui,sans-serif;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.35);transform:translate(-50%,-100%);display:inline-block;cursor:grab}
 .leaflet-div-icon{background:none;border:0}
+.mapf{display:grid;grid-template-columns:1fr 1fr;gap:0 8px;margin-bottom:8px}
+.mapf label.f{margin:4px 0 3px}
+.mapf select{padding:8px;font-size:15px}
+.pin.sh{border-color:var(--fav)}
+.pin.rj{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
 .mapbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 8px}
 .mapbar .small{flex:1 1 100%}
 #mapCard{position:absolute;left:10px;right:10px;bottom:10px;z-index:900;display:none}
@@ -185,14 +190,20 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
   </section>
 
   <section class="view" id="v-map">
+    <div class="mapf">
+      <div><label class="f" for="mfShow">Show</label><select id="mfShow"><option value="all">All listings</option><option value="short">Shortlisted</option><option value="rej">Rejected</option><option value="match">Full matches only</option></select></div>
+      <div><label class="f" for="mfDist">Distance by road</label><select id="mfDist"><option value="">Any distance</option><option value="3">Within 3 km</option><option value="5">Within 5 km</option><option value="8">Within 8 km</option><option value="10">Within 10 km</option><option value="15">Within 15 km</option></select></div>
+      <div><label class="f" for="mfFrom">From</label><select id="mfFrom"></select></div>
+      <div><label class="f" for="mfRent">Rent</label><select id="mfRent"><option value="">Any rent</option><option value="0-25000">Under ₹25k</option><option value="25000-30000">₹25k – 30k</option><option value="30000-35000">₹30k – 35k</option><option value="35000-40000">₹35k – 40k</option><option value="40000-">₹40k +</option></select></div>
+    </div>
     <div class="mapbar">
-      <button id="mapRecenter" type="button">Show all</button>
+      <button id="mapRecenter" type="button">Fit pins</button>
       <button id="mapOfficeBtn" type="button">Offices</button>
       <button id="mapSaveOffice" type="button" style="display:none" class="primary">Save office pins</button>
       <span class="small muted" id="mapStatus">Loading map…</span>
     </div>
     <div id="mapWrap"><div id="map" role="application" aria-label="Map of listings"></div><div id="mapCard"></div></div>
-    <p class="small muted">Blue pins are your offices (EY Coral, RMZ Infinity, Refyne): drag one to move it. Listing pins show rent; green pins match all your main criteria, and dashed pins are approximate (placed at the area centre because the listing has no usable address). Distances are by road (shortest driving route, no traffic). Tap Directions for live driving time. Rejected listings are hidden. The map shows the listings that pass your Listings filters.</p>
+    <p class="small muted">Blue pins are your offices (EY Coral, RMZ Infinity, Refyne): drag one to move it. Listing pins show rent; green pins match all your main criteria, and dashed pins are approximate (placed at the area centre because the listing has no usable address). Distances are by road (shortest driving route, no traffic). Tap Directions for live driving time. ★ marks shortlisted listings and red pins are rejected ones (shown only when you pick "Rejected"). Use the filters above to narrow the map.</p>
   </section>
   <section class="view" id="v-rejected">
     <div class="banner warn small">Listings you rejected on this device. They're hidden from the dashboard, listings and map. Tap ☆ Shortlist to bring one back onto your shortlist, or Restore to just un-reject it.</div>
@@ -827,7 +838,7 @@ async function roadAll(){
   if(roadBusy) return; roadBusy=true;
   try{
     for(const o of offices()){
-      const need=mapList().filter(p=>GEO["L:"+p.id] && roadKm(p,o)==null);
+      const need=geoPool().filter(p=>GEO["L:"+p.id] && roadKm(p,o)==null);
       for(let i=0;i<need.length;i+=80){
         const chunk=need.slice(i,i+80);
         const coords=[`${o.lon},${o.lat}`, ...chunk.map(p=>{ const g=GEO["L:"+p.id]; return `${g.lon},${g.lat}`; })].join(";");
@@ -868,14 +879,43 @@ async function geocodeListing(p){
 }
 const MAP={map:null,layer:null,office:null,markers:{},sel:null,busy:false,dirtyOffice:false};
 function kfmt(n){ return typeof n==="number"? "₹"+(n>=1000?(Math.round(n/100)/10).toString().replace(/\.0$/,"")+"k":n) : "?"; }
-function mapList(){ return applyFilters(S.props).filter(p=>p.status!=="gone" && !(S.marks[p.id]||{}).rejected); }
+const MF=(()=>{ try{ return JSON.parse(localStorage.getItem("fmh_mapf")||"{}")||{}; }catch{ return {}; } })();
+function mfSave(){ try{ localStorage.setItem("fmh_mapf", JSON.stringify(MF)); }catch{} }
+function geoPool(){ return S.props.filter(p=>p.status!=="gone"); }
+function mapList(){
+  const show=MF.show||"all";
+  let arr=geoPool().filter(p=>{ const rej=!!(S.marks[p.id]||{}).rejected;
+    if(show==="rej") return rej;
+    if(rej) return false;
+    if(show==="short") return !!S.shortlist[p.id];
+    if(show==="match") return evaluate(p).majorOk;
+    return true; });
+  if(MF.rent){ const [lo,hi]=MF.rent.split("-").map(x=>x===""?null:+x); arr=arr.filter(p=>typeof p.rent==="number" && (lo==null||p.rent>=lo) && (hi==null||p.rent<=hi)); }
+  if(MF.dist){ const max=+MF.dist; const offs=offices().filter(o=>!MF.from||MF.from==="any"||o.id===MF.from);
+    arr=arr.filter(p=>offs.some(o=>{ const km=roadKm(p,o); return km!=null && km<=max; })); }
+  return arr;
+}
+function wireMapFilters(){
+  const from=$("#mfFrom"); const offs=offices();
+  from.innerHTML=`<option value="any">Any office</option>`+offs.map(o=>`<option value="${esc(o.id)}">${esc(o.short||o.name)}</option>`).join("");
+  $("#mfShow").value=MF.show||"all"; $("#mfDist").value=MF.dist||""; $("#mfRent").value=MF.rent||""; from.value=MF.from||"any";
+  from.disabled=!MF.dist;
+  const on=()=>{ MF.show=$("#mfShow").value; MF.dist=$("#mfDist").value; MF.rent=$("#mfRent").value; MF.from=from.value; from.disabled=!MF.dist; mfSave();
+    if(MAP.sel && !mapList().some(p=>p.id===MAP.sel)){ $("#mapCard").classList.remove("on"); MAP.sel=null; }
+    drawPins(); mapCount(); };
+  ["#mfShow","#mfDist","#mfRent","#mfFrom"].forEach(id=>$(id).onchange=on);
+}
+function mapCount(){ if(MAP.busy||MAP.dirtyOffice) return; const n=mapList().filter(p=>GEO["L:"+p.id]).length;
+  const pending=MF.dist && geoPool().some(p=>GEO["L:"+p.id] && offices().some(o=>roadKm(p,o)==null));
+  $("#mapStatus").textContent=`${n} listing${n===1?"":"s"} shown${pending?" (still calculating some road distances)":""}.`; }
 function drawPins(){
   if(!MAP.map) return;
   MAP.layer.clearLayers(); MAP.markers={};
   for(const p of mapList()){
     const g=GEO["L:"+p.id]; if(!g) continue;
     const m=evaluate(p).majorOk;
-    const icon=L.divIcon({className:"",html:`<span class="pin ${m?"m":""} ${g.q==="area"?"ap":""} ${MAP.sel===p.id?"sel":""}">${kfmt(p.rent)}</span>`,iconSize:null});
+    const rj=!!(S.marks[p.id]||{}).rejected, sh=!!S.shortlist[p.id];
+    const icon=L.divIcon({className:"",html:`<span class="pin ${m&&!rj?"m":""} ${rj?"rj":""} ${sh?"sh":""} ${g.q==="area"?"ap":""} ${MAP.sel===p.id?"sel":""}">${sh?"★ ":""}${kfmt(p.rent)}</span>`,iconSize:null});
     const mk=L.marker([g.lat,g.lon],{icon,title:(p.title||"")+" · "+kfmt(p.rent),keyboard:true}).addTo(MAP.layer);
     mk.on("click",()=>selectPin(p.id)); MAP.markers[p.id]=mk;
   }
@@ -893,12 +933,14 @@ function selectPin(id){
     <div><b>${esc(inr(p.rent)||"")}</b>${p.maintenance?` <span class="small muted">+ ${esc(inr(p.maintenance))} maint.</span>`:""} <span class="small muted">· ${esc(p.locality||"")}</span></div>
     <div class="small muted">${esc([p.furnishing,p.areaSqft?p.areaSqft+" sq ft":null,p.facing?p.facing+" facing":null,p.parking?("Parking: "+p.parking):null].filter(Boolean).join(" · "))}</div>
     ${rows}${g&&g.q==="area"?`<div class="small muted">Pin is approximate (area centre).</div>`:""}
-    <div class="actions"><a class="btn primary" href="${esc(p.url)}" target="_blank" rel="noopener">Open listing ↗</a><button data-reject="${esc(p.id)}">Reject</button></div></div>`;
+    <div class="actions"><a class="btn primary" href="${esc(p.url)}" target="_blank" rel="noopener">Open listing ↗</a>${S.canWrite?`<button data-mfav="1">${S.shortlist[p.id]?"★ Shortlisted":"☆ Shortlist"}</button><button data-reject="${esc(p.id)}">${(S.marks[p.id]||{}).rejected?"↺ Restore":"Reject"}</button>`:""}</div></div>`;
   el.classList.add("on");
   $("#mcClose").onclick=()=>{ el.classList.remove("on"); MAP.sel=null; drawPins(); };
   if(g) offs.forEach(o=>{ if(roadKm(p,o)!=null) return; roadDist(g,o).then(km=>{ if(km==null) return; ROAD[p.id+"|"+o.id]={km,s:roadSig(o,g)}; roadSave();
     const r=el.querySelector(`[data-road="${o.id}"]`); if(r&&MAP.sel===id) r.textContent=`${o.short||o.name}: ${km.toFixed(1)} km by road`; }); });
-  const rj=el.querySelector("[data-reject]"); if(rj) rj.onclick=()=>{ el.classList.remove("on"); MAP.sel=null; saveMark(p.id,{rejected:true}); toast("Rejected and removed from the map"); };
+  const rj=el.querySelector("[data-reject]"); if(rj) rj.onclick=()=>{ const was=!!(S.marks[p.id]||{}).rejected; saveMark(p.id,{rejected:!was}); toast(was?"Restored":"Rejected");
+    if(!mapList().some(x=>x.id===id)){ el.classList.remove("on"); MAP.sel=null; drawPins(); } else selectPin(id); mapCount(); };
+  const fv=el.querySelector("[data-mfav]"); if(fv) fv.onclick=async()=>{ await toggleFav(p); selectPin(id); };
 }
 async function roadDist(g,o){
   try{ const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${g.lon},${g.lat};${o.lon},${o.lat}?overview=false`); if(!r.ok) return null;
@@ -933,7 +975,7 @@ function fitAll(){
 }
 async function geocodeAll(){
   if(MAP.busy) return; MAP.busy=true;
-  const todo=mapList().filter(p=>!GEO["L:"+p.id]);
+  const todo=geoPool().filter(p=>!GEO["L:"+p.id]);
   let n=0;
   for(const p of todo){
     n++; $("#mapStatus").textContent=`Placing listings on the map… ${n}/${todo.length}`;
@@ -941,8 +983,7 @@ async function geocodeAll(){
     if(n%5===0) drawPins();
   }
   MAP.busy=false; drawPins(); roadAll();
-  const L2=mapList(); const placed=L2.filter(p=>GEO["L:"+p.id]).length;
-  if(!MAP.dirtyOffice) $("#mapStatus").textContent=`${placed} of ${L2.length} listings on the map.`;
+  mapCount();
   if(todo.length) { render(); if(MAP.map && !MAP.fitted){ fitAll(); MAP.fitted=true; } }
 }
 window.mapShow=function(){
@@ -956,6 +997,7 @@ window.mapShow=function(){
     $("#mapRecenter").onclick=fitAll;
     $("#mapOfficeBtn").onclick=()=>{ const pts=offices().map(o=>[o.lat,o.lon]); MAP.map.fitBounds(pts,{padding:[40,40],maxZoom:15}); };
     $("#mapSaveOffice").onclick=saveOffice;
+    wireMapFilters();
   } else { MAP.map.invalidateSize(); placeOffice(); }
   if(!MAP.triedOffice){ MAP.triedOffice=true; const loc=localOffices();
     offices().filter(o=>o.approx && o.geo && !loc[o.id]).forEach((o,i)=>setTimeout(()=>photon(o.geo).then(res=>{
@@ -967,7 +1009,7 @@ window.mapShow=function(){
   if(S.loaded.props) geocodeAll(); else $("#mapStatus").textContent="Loading listings…";
 };
 let rq=false;
-function render(){ if(rq) return; rq=true; requestAnimationFrame(()=>{ rq=false; renderHome(); renderList(); renderShortlist(); renderRejected(); renderReport(); renderPrefs(); renderRun(); if(MAP.map && $("#v-map").classList.contains("on")){ drawPins(); if(S.loaded.props && !MAP.busy && mapList().some(p=>!GEO["L:"+p.id])) geocodeAll(); } }); }
+function render(){ if(rq) return; rq=true; requestAnimationFrame(()=>{ rq=false; renderHome(); renderList(); renderShortlist(); renderRejected(); renderReport(); renderPrefs(); renderRun(); if(MAP.map && $("#v-map").classList.contains("on")){ drawPins(); if(S.loaded.props && !MAP.busy && geoPool().some(p=>!GEO["L:"+p.id])) geocodeAll(); else mapCount(); } }); }
 render();
 
 // ---------- data wiring ----------
