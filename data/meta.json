@@ -1,10 +1,10 @@
 {
   "status": {
-    "lastRunAt": "2026-10-31T19:15:03Z",
-    "lastSuccessAt": "2026-10-31T19:15:03Z",
+    "lastRunAt": "2026-10-31T19:16:28Z",
+    "lastSuccessAt": "2026-10-31T19:16:28Z",
     "lastStatus": "partial",
-    "lastSuccessRunId": "run-20261101",
-    "lastError": "Kaggadasapura flats page refused; independent-house page used instead and Kaggadasapura listings were not marked as missed",
+    "lastSuccessRunId": "run-20261101-2",
+    "lastError": "Kaggadasapura flats page refused again; independent-house page used and Kaggadasapura listings were not marked as missed",
     "nextRunAt": "2026-11-01T02:20:00Z",
     "schedule": "Daily 7:50 AM IST",
     "sources": [
@@ -12,6 +12,41 @@
     ]
   },
   "runs": [
+    {
+      "id": "run-20261101-2",
+      "startedAt": "2026-10-31T19:15:19Z",
+      "finishedAt": "2026-10-31T19:16:28Z",
+      "status": "partial",
+      "found": 30,
+      "newCount": 0,
+      "matchCount": 28,
+      "sources": [
+        "NoBroker (locality pages)"
+      ],
+      "localitiesSearched": [
+        "Kaggadasapura",
+        "Mahadevapura",
+        "Kadubeesanahalli",
+        "Doddanekundi",
+        "Hoodi",
+        "Brookefield"
+      ],
+      "localitiesFailed": [
+        "Kaggadasapura"
+      ],
+      "error": "Kaggadasapura flats page refused again; independent-house page used and Kaggadasapura listings were not marked as missed",
+      "report": {
+        "summary": "Re-check run: no new listings since the search an hour earlier, all 30 in-range listings seen again with no rent or deposit changes, and 28 active listings are full matches. Best current picks: Muraleeravam in Mahadevapura (₹35k, east-facing, lift), Srikar Residency in Kaggadasapura (₹31k, west-facing, lift, car parking) and Parimala Winsome in Marathahalli (₹30k, west-facing, lift). The Kaggadasapura flats page still could not be fetched.",
+        "top": [
+          "nobroker-8a9f9f8477628a1a0177629841c604cc",
+          "nobroker-8a9fb3827ecfc74f017ed01cf9ba1a73",
+          "nobroker-8a9fc1827f63d618017f63e363120574",
+          "nobroker-8aa9b206a081701701a0843ecd6623b1",
+          "nobroker-8a9f8c838d9c621d018d9cc948c15458"
+        ],
+        "needsConfirmation": "actual availability, facing, water supply and exact commute; Mathapathi Regency says listed by broker."
+      }
+    },
     {
       "id": "run-20261101",
       "startedAt": "2026-10-31T19:00:15Z",
