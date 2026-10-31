@@ -69,6 +69,21 @@ label.f{display:block;font-size:12px;font-weight:650;color:#496159;margin:12px 0
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:13px;background:#fff}
 .chip input{width:auto;margin:0;accent-color:var(--brand)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.opts.three{grid-template-columns:1fr 1fr 1fr}
+.opt{display:flex;align-items:center;justify-content:center;text-align:center;min-height:44px;padding:8px;border:1px solid var(--line);border-radius:10px;background:#f1f3f2;font-size:14px;cursor:pointer;user-select:none}
+.opt input{position:absolute;opacity:0;width:1px;height:1px}
+.opt.on{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:600}
+.opt.dis{opacity:.6;cursor:default}
+.locwrap{position:relative}
+.sugg{position:absolute;left:0;right:0;top:100%;z-index:30;background:#fff;border:1px solid var(--line);border-radius:10px;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:300px;overflow:auto;display:none}
+.sugg.on{display:block}
+.sugg button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #eef2ef;background:#fff;padding:10px 12px;font-size:14px;border-radius:0}
+.sugg button:last-child{border-bottom:0}.sugg button small{display:block;color:#6b7c75;font-size:12px}
+.sugg button.hl,.sugg button:hover{background:#eef6f1}
+.loclist{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.locitem{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;font-size:14px}
+.locitem .n{flex:1}.locitem .k{color:#6b7c75;font-size:12px;width:18px}
+.locitem button{padding:4px 9px;font-size:13px;min-height:0}
 .filterbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}
 .filterbar select{flex:1}
 .sheet{display:none;position:fixed;inset:0;z-index:20;background:rgba(10,30,24,.45)}
@@ -248,6 +263,20 @@ function availInfo(p){
   if (p.availability === "verified") return {t:"Verified available", c:"ok"};
   return {t:"Availability unconfirmed", c:"warn"};
 }
+function bhkOk(b, types){
+  return types.some(t=>{ if(/RK/i.test(t)) return b<1; if(/4\+/.test(t)) return b>4; const n=parseInt(t,10); return b===n; });
+}
+function ptypeOk(p, types){
+  if(!types || !types.length) return true;
+  const k=String(p.propertyType||"").toLowerCase(); if(!k) return true;
+  const gated=p.gated===true || /gated/i.test(String(p.security||""));
+  return types.some(t=>{
+    if(t==="Apartment") return /apartment|flat|standalone/.test(k);
+    if(t==="Independent House/Villa") return /house|villa|independent/.test(k);
+    if(t==="Gated Societies") return /apartment|flat/.test(k) && gated;
+    if(t==="Gated Community Villa") return /villa/.test(k) && gated;
+    return false; });
+}
 function evaluate(p){
   const pr = prefsOrDefault(); const notes=[]; let score=0; let majorOk=true;
   const total = (p.rent||0);
@@ -257,7 +286,14 @@ function evaluate(p){
     else score+=20;
     if (pr.maxRent && p.maintenance && p.rent + p.maintenance > pr.maxRent) notes.push("rent + maintenance over budget");
   } else { majorOk=false; notes.push("rent unknown"); }
-  if (p.bhk && p.bhk !== 2){ majorOk=false; score-=40; }
+  if (p.bhk && !bhkOk(p.bhk, pr.bhkTypes||["2 BHK"])){ majorOk=false; score-=40; notes.push("BHK not in preferences"); }
+  const want=pr.parking||[];
+  if (want.length && p.parking){
+    const pk=String(p.parking).toLowerCase();
+    if (want.some(w=>/4-wheeler/.test(w)) && !/car|4|four|covered/.test(pk)){ score-=6; notes.push("no car parking listed"); }
+    if (want.some(w=>/2-wheeler/.test(w)) && !/bike|2|two/.test(pk)){ score-=3; notes.push("no bike parking listed"); }
+  }
+  if (!ptypeOk(p, pr.propertyTypes)) { score-=8; notes.push("property type not preferred"); }
   const locs=(pr.localities||[]).map(norm);
   if (locs.includes(norm(p.locality))) score+=15; else { notes.push("outside preferred areas"); }
   const c = commuteFor(p);
@@ -505,7 +541,63 @@ $("#saveNote").onclick=()=>{ if(noteP){ saveMark(noteP.id,{notes:$("#noteText").
 $("#closeNote").onclick=()=>$("#noteSheet").classList.remove("on");
 
 // ---------- preferences ----------
+const PTYPES=["Apartment","Independent House/Villa","Gated Societies","Gated Community Villa"];
+const DEF_PTYPES=["Apartment","Independent House/Villa"];
+const BHKS=["1 RK","1 BHK","2 BHK","3 BHK","4 BHK","4+ BHK"];
+const PARKS=["4-wheeler (car) parking","2-wheeler (bike) parking"];
+const KNOWN_LOCS=["Kaggadasapura","Mahadevapura","Kadubeesanahalli","Doddanekundi","Hoodi","Brookefield","Marathahalli","C V Raman Nagar","Panathur","Munnekollal","Whitefield","Bellandur","Kundalahalli","AECS Layout","ITPL","Kadugodi","Varthur","Sarjapur Road","HSR Layout","Koramangala","Indiranagar","HAL Old Airport Road","Old Madras Road","KR Puram","Ramamurthy Nagar","Banaswadi","Kalyan Nagar","HBR Layout","Hebbal","Thanisandra","Hennur","Domlur","Ejipura","Bellandur Gate","Kasavanahalli","Haralur","Electronic City","BTM Layout","Jayanagar","JP Nagar","Bannerghatta Road","Malleshpalya","Vignan Nagar","New Thippasandra","Jeevan Bima Nagar","Basavanagara","Garudacharpalya","Seetharampalya","Thubarahalli","Siddapura","Nallurahalli","Hagadur","Channasandra","Belathur","Kodigehalli","Medahalli","Bhattarahalli","Avalahalli","Bagmane Tech Park","Kartik Nagar","Chinnappanahalli","Spice Garden","Green Glen Layout","Devarabeesanahalli","Yemalur","Ambalipura","Kodathi","Sarjapur","Hosa Road","Begur","Hulimavu","Rajajinagar","Malleshwaram","Yeshwanthpur","Hebbal Kempapura","Yelahanka","Frazer Town","Cooke Town","Richmond Town","MG Road","Ulsoor","Vimanapura","Murugeshpalya","Jogupalya","Benson Town"];
+function optHTML(group,val,on,ro){ return `<label class="opt ${on?"on":""} ${ro?"dis":""}"><input type="checkbox" data-opt="${group}" value="${esc(val)}" ${on?"checked":""} ${ro?"disabled":""}>${esc(val)}</label>`; }
+function renderLocList(){
+  const el=$("#locList"); if(!el) return; const ro=!S.isOwner; const L=S.editLocs||[];
+  el.innerHTML = L.length? L.map((n,i)=>`<div class="locitem"><span class="k">${i+1}</span><span class="n">${esc(n)}</span>${ro?"":`${i>0?`<button type="button" data-lu="${i}" aria-label="Move up">↑</button>`:""}<button type="button" data-lr="${i}" aria-label="Remove ${esc(n)}">✕</button>`}</div>`).join("")
+    : `<div class="small muted">No localities yet. Search above to add one.</div>`;
+  el.querySelectorAll("[data-lr]").forEach(b=>b.onclick=()=>{ S.editLocs.splice(+b.dataset.lr,1); S.prefsDirty=true; renderLocList(); });
+  el.querySelectorAll("[data-lu]").forEach(b=>b.onclick=()=>{ const i=+b.dataset.lu; const L=S.editLocs; [L[i-1],L[i]]=[L[i],L[i-1]]; S.prefsDirty=true; renderLocList(); });
+}
+function addLoc(name){
+  name=String(name||"").trim().replace(/[^\p{L}\p{N} .,'-]/gu,"").slice(0,60); if(!name) return;
+  S.editLocs=S.editLocs||[];
+  if(S.editLocs.some(x=>norm(x)===norm(name))) return toast(name+" is already in the list");
+  if(S.editLocs.length>=25) return toast("Up to 25 localities");
+  S.editLocs.push(name); S.prefsDirty=true; renderLocList();
+}
+function wireLocSearch(){
+  const inp=$("#locSearch"), box=$("#locSugg"); if(!inp) return;
+  let items=[], hl=-1, timer=null, seq=0;
+  const close=()=>{ box.classList.remove("on"); inp.setAttribute("aria-expanded","false"); hl=-1; };
+  const show=()=>{
+    if(!items.length){ close(); return; }
+    box.innerHTML=items.map((it,i)=>`<button type="button" role="option" data-i="${i}" class="${i===hl?"hl":""}">${esc(it.name)}${it.sub?`<small>${esc(it.sub)}</small>`:""}</button>`).join("");
+    box.classList.add("on"); inp.setAttribute("aria-expanded","true");
+    box.querySelectorAll("button").forEach(b=>b.onmousedown=e=>{ e.preventDefault(); pick(+b.dataset.i); });
+  };
+  const pick=i=>{ const it=items[i]; if(!it) return; addLoc(it.name); inp.value=""; items=[]; close(); inp.focus(); };
+  const local=q=>{ const n=norm(q); const pre=KNOWN_LOCS.filter(x=>norm(x).startsWith(n)); const mid=KNOWN_LOCS.filter(x=>!norm(x).startsWith(n)&&norm(x).includes(n)); return [...pre,...mid].slice(0,6).map(x=>({name:x,sub:"Bengaluru"})); };
+  const remote=async q=>{
+    const u="https://photon.komoot.io/api/?limit=10&lang=en&lat=12.97&lon=77.68&bbox=77.35,12.75,77.90,13.20&q="+encodeURIComponent(q);
+    const r=await fetch(u); if(!r.ok) return []; const j=await r.json();
+    return (j.features||[]).map(f=>f.properties||{}).filter(p=>p.name && /karnataka/i.test(p.state||"") )
+      .map(p=>({name:p.name, sub:[p.district||p.locality, p.city||p.county].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i && norm(v)!==norm(p.name)).join(", ")||"Bengaluru"}));
+  };
+  inp.oninput=()=>{
+    const q=inp.value.trim(); hl=-1;
+    if(q.length<2){ items=[]; close(); return; }
+    items=local(q); show();
+    clearTimeout(timer); const my=++seq;
+    timer=setTimeout(async()=>{ try{ const rem=await remote(q); if(my!==seq) return;
+      const seen=new Set(items.map(x=>norm(x.name))); rem.forEach(x=>{ if(!seen.has(norm(x.name))){ seen.add(norm(x.name)); items.push(x); } });
+      items=items.slice(0,10); show(); }catch{} }, 280);
+  };
+  inp.onkeydown=e=>{
+    if(e.key==="ArrowDown"){ e.preventDefault(); if(items.length){ hl=(hl+1)%items.length; show(); } }
+    else if(e.key==="ArrowUp"){ e.preventDefault(); if(items.length){ hl=(hl-1+items.length)%items.length; show(); } }
+    else if(e.key==="Enter"){ e.preventDefault(); if(hl>=0) pick(hl); else if(items.length) pick(0); else if(inp.value.trim()){ addLoc(inp.value); inp.value=""; } }
+    else if(e.key==="Escape"){ close(); }
+  };
+  inp.onblur=()=>setTimeout(close,150);
+}
 function renderPrefs(){
+  if(S.prefsDirty) return;
   const pr=S.prefs; const el=$("#prefsForm");
   if(!S.loaded.prefs){ el.innerHTML=`<div class="empty">Loading preferences…</div>`; return; }
   if(!pr){ el.innerHTML=`<div class="empty">No preferences saved yet.</div>`; return; }
@@ -518,12 +610,18 @@ function renderPrefs(){
     <b>Search</b>
     <label class="chip" style="margin-top:8px"><input type="checkbox" id="pEnabled" ${pr.searchEnabled?"checked":""} ${ro?"disabled":""}> Daily automatic search is ON</label>
     <p class="small muted" style="margin:8px 0 0">Runs once a day at about ${esc(pr.scheduleLabel||"7:50 AM IST")} in the cloud. Turn off to pause; the next run will skip until you turn it back on.</p>
-    <label class="f">Property type</label><input id="pType" value="${esc(pr.propertyType||"2 BHK apartment")}" ${ro?"disabled":""}>
+    <label class="f">Property type</label>
+    <div class="opts">${PTYPES.map(t=>optHTML("ptype",t,(pr.propertyTypes||DEF_PTYPES).includes(t),ro)).join("")}</div>
+    <label class="f">BHK type</label>
+    <div class="opts three">${BHKS.map(t=>optHTML("bhk",t,(pr.bhkTypes||["2 BHK"]).includes(t),ro)).join("")}</div>
+    <label class="f">Parking needed</label>
+    <div class="opts">${PARKS.map(t=>optHTML("park",t,(pr.parking||[]).includes(t),ro)).join("")}</div>
     <div class="row"><div><label class="f">Min rent (₹)</label><input id="pMin" inputmode="numeric" value="${pr.minRent||""}" ${ro?"disabled":""}></div>
     <div><label class="f">Max rent (₹)</label><input id="pMax" inputmode="numeric" value="${pr.maxRent||""}" ${ro?"disabled":""}></div></div>
     <label class="f">Max commute target (minutes)</label><input id="pCommute" inputmode="numeric" value="${pr.maxCommute||""}" ${ro?"disabled":""}>
-    <label class="f">Preferred localities (one per line, in priority order)</label>
-    <textarea id="pLocs" ${ro?"disabled":""}>${esc((pr.localities||[]).join("\n"))}</textarea>
+    <label class="f">Preferred localities (in priority order)</label>
+    ${ro?"":`<div class="locwrap"><input id="locSearch" placeholder="Search a locality, e.g. Hoodi" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false"><div class="sugg" id="locSugg" role="listbox"></div></div>`}
+    <div class="loclist" id="locList"></div>
     <label class="f">Preferred facing</label>
     <div class="chips">${facings.map(f=>`<label class="chip"><input type="checkbox" data-facing="${f}" ${(pr.facing||[]).includes(f)?"checked":""} ${ro?"disabled":""}> ${f}</label>`).join("")}</div>
     <label class="f">Furnishing accepted</label>
@@ -549,6 +647,9 @@ function renderPrefs(){
     <div class="cmtform"><input id="myName" maxlength="40" value="${esc(S.email||"")}"><button id="saveName" type="button">Save</button></div>
     <div class="actions"><button id="lockBtn">Lock this device</button></div>
   </div>`}`;
+  S.editLocs=[...(pr.localities||[])]; renderLocList(); wireLocSearch();
+  el.querySelectorAll(".opt input").forEach(i=>i.onchange=()=>{ i.closest(".opt").classList.toggle("on",i.checked); S.prefsDirty=true; });
+  el.oninput=()=>{ S.prefsDirty=true; };
   const sp=$("#savePrefs"); if(sp) sp.onclick=savePrefs;
   const sn=$("#saveName"); if(sn) sn.onclick=()=>{ const n=$("#myName").value.trim().slice(0,40)||"Guest"; S.email=n; ls.set("fmh_name",n); toast("Name saved"); render(); };
   const ub=$("#unlockBtn"); if(ub) ub.onclick=showCode;
@@ -559,9 +660,14 @@ async function savePrefs(){
   const minRent=num("#pMin"), maxRent=num("#pMax"), maxCommute=num("#pCommute");
   if (minRent && maxRent && minRent>maxRent) return toast("Min rent is above max rent");
   if (maxRent && maxRent>500000) return toast("Max rent looks too high");
-  const locs=$("#pLocs").value.split("\n").map(s=>s.trim().replace(/[^\p{L}\p{N} .,'-]/gu,"").slice(0,60)).filter(Boolean).slice(0,25);
+  const locs=(S.editLocs||[]).map(s=>s.trim().replace(/[^\p{L}\p{N} .,'-]/gu,"").slice(0,60)).filter(Boolean).slice(0,25);
+  const pick=k=>[...document.querySelectorAll(`[data-opt="${k}"]:checked`)].map(x=>x.value);
+  const propertyTypes=pick("ptype"), bhkTypes=pick("bhk"), parking=pick("park");
+  if(!propertyTypes.length) return toast("Pick at least one property type");
+  if(!bhkTypes.length) return toast("Pick at least one BHK type");
   if(!locs.length) return toast("Add at least one locality");
-  const patch={ searchEnabled:$("#pEnabled").checked, propertyType:$("#pType").value.slice(0,60),
+  const patch={ searchEnabled:$("#pEnabled").checked, propertyTypes, bhkTypes, parking,
+    propertyType: bhkTypes.join("/")+" "+propertyTypes.join(" / "),
     minRent, maxRent, maxCommute, localities:locs,
     facing:[...document.querySelectorAll("[data-facing]:checked")].map(x=>x.dataset.facing),
     furnishing:[...document.querySelectorAll("[data-furn]:checked")].map(x=>x.dataset.furn),
@@ -570,7 +676,7 @@ async function savePrefs(){
   const data={...S.prefs, ...patch};
   const {error}=await S.sb.from("prefs").update({data, updated_at:new Date().toISOString()}).eq("id",1);
   if(error) return toast("Couldn't save preferences. Try again.");
-  S.prefs=data; toast("Preferences saved"); render();
+  S.prefs=data; S.prefsDirty=false; toast("Preferences saved"); render();
 }
 
 // ---------- report ----------
@@ -615,7 +721,13 @@ function renderHome(){
        ${st.lastError?`<div class="banner bad" style="margin:8px 0 0">${esc(st.lastError)}</div>`:""}
        <div class="muted" style="margin-top:6px">Sources: ${esc((st.sources||[]).join(", ")||"–")}</div>`;
   }
+  if(S.canWrite){
+    const busy=S.runState==="sending"||S.runState==="running";
+    h+=`<div class="actions" style="margin-top:10px"><button class="primary" id="runNowBtn" ${busy?"disabled":""}>${S.runState==="sending"?"Starting…":S.runState==="running"?"Search running…":"Run search now"}</button></div>
+      ${S.runMsg?`<div class="small ${S.runState==="error"?"":"muted"}" style="margin-top:6px">${esc(S.runMsg)}</div>`:""}`;
+  }
   $("#statusPanel").innerHTML=h;
+  const rb=$("#runNowBtn"); if(rb) rb.onclick=runNow;
   const newOnes=evals.filter(x=>isNew(x.p) && !(S.marks[x.p.id]||{}).rejected).sort((a,b)=>b.e.score-a.e.score).slice(0,5);
   const best = newOnes.length? newOnes : evals.filter(x=>x.e.majorOk && !(S.marks[x.p.id]||{}).rejected).sort((a,b)=>b.e.score-a.e.score).slice(0,5);
   $("#homeNew").innerHTML = !S.loaded.props? `<div class="empty">Loading listings…</div>` :
@@ -660,11 +772,42 @@ async function loadVotes(){ const {data}=await S.sb.from("votes").select("*"); c
 async function loadMembers(){ const {data}=await S.sb.from("members").select("*").order("added_at"); S.members=data||[]; render(); }
 const ls={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v)}catch{}},del(k){try{localStorage.removeItem(k)}catch{}}};
 function deviceId(){ let id=ls.get("fmh_device"); if(!id){ id=(crypto.randomUUID?crypto.randomUUID():"10000000-1000-4000-8000-100000000000".replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16))); ls.set("fmh_device",id); } return id; }
+async function runNow(){
+  const cfg=window.FMH_CONFIG||{};
+  S.runState="sending"; S.runMsg=""; render();
+  let res, j={};
+  try{
+    res=await fetch(cfg.supabaseUrl+"/functions/v1/run-search",{method:"POST",headers:{"Content-Type":"application/json",apikey:cfg.supabaseAnonKey},body:JSON.stringify({passcode:S.code,name:S.email})});
+    j=await res.json().catch(()=>({}));
+  }catch(e){ S.runState="error"; S.runMsg="Couldn't reach the search service. Check your connection."; return render(); }
+  if(res.ok){ S.runState="running"; S.runSince=Date.now(); ls.set("fmh_runSince",String(S.runSince));
+    S.runMsg="Search started. It usually takes 10–20 minutes; this page updates by itself when results arrive."; render(); pollRun(); return; }
+  S.runState="error";
+  if(res.status===429 && j.retryAt){ const t=new Date(j.retryAt); S.runMsg=`A search was started recently. You can start another after ${t.toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit"})}.`; }
+  else if(res.status===503) S.runMsg="Run now isn't switched on yet (the search service key hasn't been added).";
+  else if(res.status===401){ S.runMsg="Passcode no longer valid. Lock this device and enter it again."; }
+  else S.runMsg=j.error||("Couldn't start the search ("+res.status+").");
+  render();
+}
+let pollT=null;
+function pollRun(){
+  clearTimeout(pollT);
+  if(!S.runSince) return;
+  if(Date.now()-S.runSince>45*60000){ S.runState=null; S.runMsg="The search is taking longer than usual. Check the Daily report later."; ls.del("fmh_runSince"); return render(); }
+  pollT=setTimeout(async()=>{
+    try{ const m=await fetchJSON("data/meta.json"); const r0=(m.runs||[])[0];
+      const t=r0 && Date.parse(r0.finishedAt||r0.startedAt||0);
+      if(t && t>S.runSince-60000){ S.runState=null; S.runSince=null; ls.del("fmh_runSince"); S.runMsg="Search finished: "+(r0.newCount??0)+" new, "+(r0.matchCount??0)+" matches."; toast("Search finished"); await loadListings(); return; }
+    }catch{}
+    pollRun();
+  }, 45000);
+}
 function showCode(){ $("#codeView").style.display=""; window.scrollTo({top:0,behavior:"smooth"}); }
 async function startOpen(code){
   const cfg=window.FMH_CONFIG||{};
   S.sb=window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}, global:{headers:{"x-passcode":code}}});
-  S.uid=deviceId(); S.email=ls.get("fmh_name")||"Guest";
+  S.uid=deviceId(); S.email=ls.get("fmh_name")||"Guest"; S.code=code;
+  const rs=+ls.get("fmh_runSince"); if(rs && Date.now()-rs<45*60000){ S.runSince=rs; S.runState="running"; S.runMsg="Search running. This page updates by itself when results arrive."; pollRun(); }
   S.member=true; S.canWrite=true; S.isOwner=true;
   $("#codeView").style.display="none"; $("#viewBar").style.display="none"; showApp(true); route();
   await Promise.all([loadListings(), loadPrefs(), loadShortlist(), loadMarks(), loadComments(), loadVotes()]);
