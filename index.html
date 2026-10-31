@@ -106,18 +106,15 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
 </header>
 <main>
   <div id="globalMsg"></div>
-  <section id="loginView" class="panel" style="display:none">
-    <h2 style="margin-top:0">Sign in</h2>
-    <p class="small muted">Optional. Everyone can view listings without signing in. Sign in only if you want to shortlist, comment, vote or change preferences. Once signed in, you stay signed in on this device.</p>
-    <form id="loginForm"><label class="f" for="loginEmail">Email</label>
-      <input id="loginEmail" type="email" autocomplete="email" required placeholder="you@example.com">
-      <div class="actions"><button class="primary" type="submit" id="loginBtn">Email me a sign-in link</button><button type="button" id="loginClose">Not now</button></div></form>
-    <p class="small muted" id="loginMsg"></p>
-  </section>
-  <section id="notMember" class="panel" style="display:none">
-    <h2 style="margin-top:0">Waiting for an invite</h2>
-    <p class="small">You're signed in as <b id="nmEmail"></b>, but this email hasn't been invited yet. Ask the owner to add it under Preferences → People.</p>
-    <div class="actions"><button id="nmSignOut">Sign out</button></div>
+  <section id="codeView" class="panel" style="display:none">
+    <h2 style="margin-top:0">Enter passcode</h2>
+    <p class="small muted">This dashboard is private. Enter the passcode to open it. You'll only need to do this once on each device.</p>
+    <form id="codeForm"><label class="f" for="codeInput">Passcode</label>
+      <input id="codeInput" type="password" inputmode="numeric" autocomplete="current-password" required>
+      <label class="f" for="nameInput">Your name (shown on comments and votes)</label>
+      <input id="nameInput" maxlength="40" autocomplete="given-name" placeholder="e.g. Jai">
+      <div class="actions"><button class="primary" type="submit" id="codeBtn">Open dashboard</button></div></form>
+    <p class="small muted" id="codeMsg"></p>
   </section>
 
   <section class="view" id="v-home">
@@ -424,24 +421,24 @@ document.addEventListener("click", async ev=>{
 });
 
 // ---------- people, votes, comments ----------
-function nameOf(email){ if(!email) return "Someone"; if(email===S.email) return "you"; return email.split("@")[0]; }
+function nameOf(email,uid){ if(uid&&uid===S.uid) return "you"; if(!email) return "Someone"; return email.split("@")[0]; }
 function votesHTML(p){
   const vs=S.votes[p.id]||[]; const up=vs.filter(v=>v.value===1), dn=vs.filter(v=>v.value===-1);
   const mine=(vs.find(v=>v.user_id===S.uid)||{}).value;
-  const names=a=>a.map(v=>esc(nameOf(v.user_email))).join(", ");
+  const names=a=>a.map(v=>esc(nameOf(v.user_email,v.user_id))).join(", ");
   return `<div class="votes"><button data-act="up" class="${mine===1?"on":""}">👍 ${up.length}</button><button data-act="down" class="${mine===-1?"on":""}">👎 ${dn.length}</button>
     <span class="who">${up.length?"Likes: "+names(up):""}${up.length&&dn.length?" · ":""}${dn.length?"Not keen: "+names(dn):""}</span></div>`;
 }
 function commentsHTML(p){
   const cs=S.comments[p.id]||[];
-  return `<div class="cmts">${cs.map(c=>`<div class="cmt"><b>${esc(nameOf(c.user_email))}</b> ${esc(c.body)} <span>${esc(fmtDT(c.created_at)||"")}</span>${c.user_id===S.uid?` <a href="#" data-act="delc" data-cid="${c.id}" class="small">delete</a>`:""}</div>`).join("")}
+  return `<div class="cmts">${cs.map(c=>`<div class="cmt"><b>${esc(nameOf(c.user_email,c.user_id))}</b> ${esc(c.body)} <span>${esc(fmtDT(c.created_at)||"")}</span>${c.user_id===S.uid?` <a href="#" data-act="delc" data-cid="${c.id}" class="small">delete</a>`:""}</div>`).join("")}
     <form class="cmtform" data-pid="${esc(p.id)}"><input maxlength="1000" placeholder="Add a comment for everyone…" aria-label="Comment"><button type="submit">Post</button></form></div>`;
 }
 document.addEventListener("submit", async ev=>{
   const f=ev.target.closest(".cmtform"); if(!f) return; ev.preventDefault();
   const inp=f.querySelector("input"); const body=inp.value.trim(); if(!body) return;
   inp.disabled=true;
-  const {error}=await S.sb.from("comments").insert({prop_id:f.dataset.pid, body});
+  const {error}=await S.sb.from("comments").insert({prop_id:f.dataset.pid, body, user_id:S.uid, user_email:S.email});
   inp.disabled=false;
   if(error) return toast("Couldn't post comment");
   inp.value=""; await loadComments();
@@ -450,7 +447,7 @@ async function vote(p,val){
   const mine=((S.votes[p.id]||[]).find(v=>v.user_id===S.uid)||{}).value;
   let error;
   if(mine===val) ({error}=await S.sb.from("votes").delete().match({prop_id:p.id,user_id:S.uid}));
-  else ({error}=await S.sb.from("votes").upsert({prop_id:p.id,user_id:S.uid,value:val}));
+  else ({error}=await S.sb.from("votes").upsert({prop_id:p.id,user_id:S.uid,user_email:S.email,value:val,updated_at:new Date().toISOString()}));
   if(error) return toast("Couldn't save vote"); await loadVotes();
 }
 
@@ -459,7 +456,7 @@ async function toggleFav(p){
   if(!S.member) return;
   let error;
   if (S.shortlist[p.id]) ({error}=await S.sb.from("shortlist").delete().eq("prop_id",p.id));
-  else ({error}=await S.sb.from("shortlist").insert({prop_id:p.id}));
+  else ({error}=await S.sb.from("shortlist").insert({prop_id:p.id,added_by:S.uid,added_by_email:S.email}));
   if(error) return toast("Couldn't update shortlist");
   toast(S.shortlist[p.id]?"Removed from shortlist":"Added to shortlist"); await loadShortlist();
 }
@@ -515,7 +512,7 @@ function renderPrefs(){
   const facings=["East","West","North","South","North-East","North-West","South-East","South-West"];
   const commuteRows=Object.entries(pr.commute||{}).map(([k,c])=>`<tr><td>${esc(k)}</td><td>${c.minMin}–${c.maxMin} min</td><td>${c.km?("~"+c.km+" km"):""}</td></tr>`).join("");
   el.innerHTML=`
-  ${ro?`<div class="banner warn">${S.session?"View only. The owner manages preferences.":"View only. Sign in (below) to change preferences."}</div>`:""}
+  ${ro?`<div class="banner warn">View only.</div>`:""}
   <div class="panel">
     <b>Search</b>
     <label class="chip" style="margin-top:8px"><input type="checkbox" id="pEnabled" ${pr.searchEnabled?"checked":""} ${ro?"disabled":""}> Daily automatic search is ON</label>
@@ -541,26 +538,16 @@ function renderPrefs(){
     <p class="muted" style="margin:4px 0 8px">Rough driving-time ranges from the locality to EY Coral at office hours. They are locality-level estimates, not routed per address, and use no live traffic. Treat them as a guide and check with a maps app before deciding.</p>
     <table class="rep">${commuteRows}</table>
   </div>
-  ${!S.session?`<div class="panel small"><b>Sign in (optional)</b>
-    <p class="muted" style="margin:4px 0 8px">You can view everything without signing in. Sign in to shortlist, comment, vote, keep private notes or edit preferences.</p>
-    <div class="actions"><button class="primary" id="openLogin">Sign in</button></div></div>`:`<div class="panel small">
-    <b>People</b>
-    <p class="muted" style="margin:4px 0 8px">People listed here can sign in with their email and see the dashboard, the shortlist, comments and votes. Private notes stay private.</p>
-    <table class="rep">${S.members.map(m=>`<tr><td>${esc(m.email)}</td><td>${esc(m.role)}</td><td>${(!ro&&m.role!=="owner")?`<a href="#settings" data-rm="${esc(m.email)}">Remove</a>`:""}</td></tr>`).join("")}</table>
-    ${ro?"":`<form id="inviteForm" class="cmtform"><input type="email" id="inviteEmail" placeholder="friend@example.com" aria-label="Email to invite"><button type="submit">Invite</button></form>
-    <p class="muted" style="margin-top:6px">After inviting, send them the site link. They sign in with that email.</p>`}
-    <div class="actions"><button id="signOutBtn">Sign out (${esc(S.email||"")})</button></div>
-  </div>`}`;
+  <div class="panel small">
+    <b>This device</b>
+    <p class="muted" style="margin:4px 0 8px">Anyone with the passcode can view and edit the dashboard, shortlist, comments and votes. Notes and "contacted / rejected" marks are kept per device.</p>
+    <label class="f" for="myName">Your name</label>
+    <div class="cmtform"><input id="myName" maxlength="40" value="${esc(S.email||"")}"><button id="saveName" type="button">Save</button></div>
+    <div class="actions"><button id="lockBtn">Lock this device</button></div>
+  </div>`;
   const sp=$("#savePrefs"); if(sp) sp.onclick=savePrefs;
-  const so=$("#signOutBtn"); if(so) so.onclick=signOut;
-  const ol=$("#openLogin"); if(ol) ol.onclick=()=>{ $("#loginView").style.display=""; window.scrollTo({top:0,behavior:"smooth"}); };
-  const inv=$("#inviteForm"); if(inv) inv.onsubmit=async e=>{ e.preventDefault(); const em=$("#inviteEmail").value.trim().toLowerCase();
-    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return toast("Enter a valid email");
-    const {error}=await S.sb.from("members").insert({email:em,role:"member"}); if(error) return toast(error.code==="23505"?"Already invited":"Couldn't invite");
-    toast("Invited "+em); loadMembers(); };
-  document.querySelectorAll("[data-rm]").forEach(a=>a.onclick=async e=>{ e.preventDefault(); const em=a.dataset.rm;
-    if(a.dataset.sure!=="1"){ a.dataset.sure="1"; a.textContent="Tap again to remove"; return; }
-    const {error}=await S.sb.from("members").delete().eq("email",em); if(error) return toast("Couldn't remove"); toast("Removed "+em); loadMembers(); });
+  const sn=$("#saveName"); if(sn) sn.onclick=()=>{ const n=$("#myName").value.trim().slice(0,40)||"Guest"; S.email=n; ls.set("fmh_name",n); toast("Name saved"); render(); };
+  const lk=$("#lockBtn"); if(lk) lk.onclick=()=>{ ls.del("fmh_code"); location.hash=""; location.reload(); };
 }
 async function savePrefs(){
   const num=id=>{ const n=parseInt(String($(id).value).replace(/[^0-9]/g,""),10); return n>0?n:null; };
@@ -577,7 +564,7 @@ async function savePrefs(){
     updatedAt:new Date().toISOString() };
   const data={...S.prefs, ...patch};
   const {error}=await S.sb.from("prefs").update({data, updated_at:new Date().toISOString()}).eq("id",1);
-  if(error) return toast("Only the owner can change preferences");
+  if(error) return toast("Couldn't save preferences. Try again.");
   S.prefs=data; toast("Preferences saved"); render();
 }
 
@@ -666,37 +653,37 @@ async function loadMarks(){ const {data}=await S.sb.from("marks").select("*").eq
 async function loadComments(){ const {data}=await S.sb.from("comments").select("*").order("created_at"); const o={}; (data||[]).forEach(r=>(o[r.prop_id]=o[r.prop_id]||[]).push(r)); S.comments=o; render(); }
 async function loadVotes(){ const {data}=await S.sb.from("votes").select("*"); const o={}; (data||[]).forEach(r=>(o[r.prop_id]=o[r.prop_id]||[]).push(r)); S.votes=o; render(); }
 async function loadMembers(){ const {data}=await S.sb.from("members").select("*").order("added_at"); S.members=data||[]; render(); }
-async function signOut(){ await S.sb.auth.signOut(); location.hash=""; location.reload(); }
-
-async function startSession(session){
-  S.session=session; S.uid=session.user.id; S.email=(session.user.email||"").toLowerCase();
-  const {data:me}=await S.sb.from("members").select("email,role").eq("email",S.email).maybeSingle();
-  if(!me){ $("#loginView").style.display="none"; $("#notMember").style.display=""; $("#nmEmail").textContent=S.email; showApp(true); route(); await Promise.all([loadListings(), loadPrefs()]); return; }
-  S.member=true; S.canWrite=true; S.isOwner = me.role==="owner";
-  $("#loginView").style.display="none"; $("#notMember").style.display="none"; showApp(true); route();
-  await Promise.all([loadListings(), loadPrefs(), loadShortlist(), loadMarks(), loadComments(), loadVotes(), loadMembers()]);
-  S.sb.channel("collab").on("postgres_changes",{event:"*",schema:"public",table:"shortlist"},loadShortlist)
-    .on("postgres_changes",{event:"*",schema:"public",table:"comments"},loadComments)
-    .on("postgres_changes",{event:"*",schema:"public",table:"votes"},loadVotes).subscribe();
+const ls={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v)}catch{}},del(k){try{localStorage.removeItem(k)}catch{}}};
+function deviceId(){ let id=ls.get("fmh_device"); if(!id){ id=(crypto.randomUUID?crypto.randomUUID():"10000000-1000-4000-8000-100000000000".replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16))); ls.set("fmh_device",id); } return id; }
+async function startOpen(code){
+  const cfg=window.FMH_CONFIG||{};
+  S.sb=window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}, global:{headers:{"x-passcode":code}}});
+  S.uid=deviceId(); S.email=ls.get("fmh_name")||"Guest";
+  S.member=true; S.canWrite=true; S.isOwner=true;
+  $("#codeView").style.display="none"; showApp(true); route();
+  await Promise.all([loadListings(), loadPrefs(), loadShortlist(), loadMarks(), loadComments(), loadVotes()]);
+  const refresh=()=>{ if(document.visibilityState==="visible") Promise.all([loadShortlist(),loadComments(),loadVotes()]); };
+  document.addEventListener("visibilitychange", refresh); setInterval(refresh, 60000);
 }
 
 (async()=>{
   const cfg=window.FMH_CONFIG||{};
-  if(!window.supabase || !cfg.supabaseUrl){ showApp(true); route(); loadListings(); S.loaded.prefs=true; render(); return; }
-  S.sb=window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:"pkce"}});
   showApp(false);
-  $("#loginForm").onsubmit=async e=>{ e.preventDefault(); const em=$("#loginEmail").value.trim().toLowerCase(); if(!em) return;
-    $("#loginBtn").disabled=true; $("#loginMsg").textContent="Sending…";
-    const {error}=await S.sb.auth.signInWithOtp({email:em, options:{emailRedirectTo: location.origin+location.pathname}});
-    $("#loginBtn").disabled=false;
-    $("#loginMsg").textContent = error ? (/rate/i.test(error.message)?"Too many sign-in emails just now. Please wait an hour and try again.":"Couldn't send the link: "+error.message) : "Check your inbox for a link from Supabase and open it on this device.";
+  if(!window.supabase || !cfg.supabaseUrl){ showGlobal("Couldn't reach the data service. Check your connection and reload.","bad"); return; }
+  const probe=window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+  const check=async c=>{ const {data,error}=await probe.rpc("check_passcode",{p:c}); if(error) throw error; return data===true; };
+  const saved=ls.get("fmh_code");
+  if(saved){ try{ if(await check(saved)) return startOpen(saved); ls.del("fmh_code"); }catch(e){ return startOpen(saved); } }
+  $("#codeView").style.display="";
+  const nm=ls.get("fmh_name"); if(nm) $("#nameInput").value=nm;
+  $("#codeForm").onsubmit=async e=>{ e.preventDefault(); const c=$("#codeInput").value.trim(); if(!c) return;
+    $("#codeBtn").disabled=true; $("#codeMsg").textContent="Checking…";
+    let ok=false; try{ ok=await check(c); }catch(err){ $("#codeBtn").disabled=false; $("#codeMsg").textContent="Couldn't check the passcode. Check your connection and try again."; return; }
+    $("#codeBtn").disabled=false;
+    if(!ok){ $("#codeMsg").textContent="That passcode isn't right."; return; }
+    const n=$("#nameInput").value.trim().slice(0,40); if(n) ls.set("fmh_name",n);
+    ls.set("fmh_code",c); $("#codeMsg").textContent=""; startOpen(c);
   };
-  $("#nmSignOut").onclick=signOut;
-  $("#loginClose").onclick=()=>{ $("#loginView").style.display="none"; };
-  const {data:{session}}=await S.sb.auth.getSession();
-  if(session) await startSession(session);
-  else { showApp(true); route(); await Promise.all([loadListings(), loadPrefs()]); }
-  S.sb.auth.onAuthStateChange((ev,sess)=>{ if(ev==="SIGNED_IN" && sess && !S.member) startSession(sess); });
 })();
 })();
 </script>
