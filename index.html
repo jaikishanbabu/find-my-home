@@ -874,7 +874,7 @@ function renderRun(){
   $("#runNowBtn").onclick=async()=>{ if(S.prefsDirty){ const ok=await savePrefs(); if(!ok) return; } runNow(); };
 }
 // ---------- map ----------
-const GEO_KEY="fmh_geo_v1", OFFICE_KEY="fmh_offices_v1";
+const GEO_KEY="fmh_geo_v2", OFFICE_KEY="fmh_offices_v1";
 const DEFAULT_OFFICES=[
   {id:"ey",short:"EY Coral",name:"EY GDS — Coral, Bagmane WTC",lat:12.984863,lon:77.695266,approx:false},
   {id:"rmz",short:"RMZ Infinity",name:"RMZ Infinity",lat:12.9941,lon:77.6611,approx:false},
@@ -890,7 +890,7 @@ function offices(){
 function officePos(){ return offices()[0]; }
 function kmBetween(a,b){ const R=6371,t=x=>x*Math.PI/180; const dLa=t(b.lat-a.lat), dLo=t(b.lon-a.lon);
   const h=Math.sin(dLa/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dLo/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
-const ROAD_KEY="fmh_road_v1";
+const ROAD_KEY="fmh_road_v2";
 const ROAD=(()=>{ try{ return JSON.parse(localStorage.getItem(ROAD_KEY)||"{}")||{}; }catch{ return {}; } })();
 function roadSave(){ try{ localStorage.setItem(ROAD_KEY, JSON.stringify(ROAD)); }catch{} }
 function roadSig(o,g){ return `${o.lat.toFixed(4)},${o.lon.toFixed(4)}>${g.lat.toFixed(5)},${g.lon.toFixed(5)}`; }
@@ -920,25 +920,32 @@ async function roadAll(){
     }
   } finally { roadBusy=false; }
 }
-const photon=async q=>{ const r=await fetch("https://photon.komoot.io/api/?limit=3&lang=en&lat=12.97&lon=77.68&bbox=77.35,12.75,77.90,13.20&q="+encodeURIComponent(q)); if(!r.ok) throw new Error("geo "+r.status);
-  const j=await r.json(); return (j.features||[]).filter(f=>/karnataka/i.test((f.properties||{}).state||"")).map(f=>({lat:f.geometry.coordinates[1],lon:f.geometry.coordinates[0]})); };
+const photon=async (q,limit=5)=>{ const r=await fetch(`https://photon.komoot.io/api/?limit=${limit}&lang=en&lat=12.97&lon=77.68&bbox=77.35,12.75,77.90,13.20&q=`+encodeURIComponent(q)); if(!r.ok) throw new Error("geo "+r.status);
+  const j=await r.json(); return (j.features||[]).filter(f=>/karnataka/i.test((f.properties||{}).state||"")).map(f=>({lat:f.geometry.coordinates[1],lon:f.geometry.coordinates[0],props:f.properties||{}})); };
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-function hashJit(id){ let h=0; for(const c of id) h=(h*31+c.charCodeAt(0))|0; return [((h&255)/255-.5)*0.006, (((h>>8)&255)/255-.5)*0.006]; }
+function hashJit(id){ let h=0; for(const c of id) h=(h*31+c.charCodeAt(0))|0; return [((h&255)/255-.5)*0.004, (((h>>8)&255)/255-.5)*0.004]; }
+function locKey(n){ return norm(n).replace(/(.)\1+/g,"$1").replace(/halli$/,"hali").replace(/y$/,"i"); }
+function placeText(pr){ return locKey([pr.name,pr.district,pr.locality,pr.suburb,pr.city,pr.county,pr.street].filter(Boolean).join(" ")); }
+function inLocality(pr,loc){ const k=locKey(loc).slice(0,7); return k.length>=4 && placeText(pr).includes(k); }
 async function areaCentre(loc){
   const k="A:"+norm(loc); if(GEO[k]) return GEO[k];
-  const res=await photon(loc+", Bengaluru"); await sleep(250);
-  if(res[0]){ GEO[k]={...res[0],t:Date.now()}; geoSave(); return GEO[k]; } return null;
+  const res=await photon(loc+", Bengaluru"); await sleep(200);
+  const g=res.find(x=>locKey(x.props.name||"").includes(locKey(loc).slice(0,7))) || null;
+  if(g){ GEO[k]={lat:g.lat,lon:g.lon,t:Date.now()}; geoSave(); return GEO[k]; } return null;
 }
 function cleanAddr(a){ return String(a||"").replace(/\b(near|opp\.?|opposite|beside|behind|next to)\b/gi," ").replace(/\s+/g," ").trim(); }
 async function geocodeListing(p){
   const k="L:"+p.id; if(GEO[k]) return GEO[k];
   const c=p.locality? await areaCentre(p.locality) : null;
-  const ok=g=>g && (!c || kmBetween(c,g)<=4);
+  // A match counts only if the map service puts it in the listing's own locality (or very close to its centre).
+  const good=g=>{ if(!g) return false; const d=c?kmBetween(c,g):null;
+    if(p.locality && inLocality(g.props,p.locality)) return d==null || d<=2.5;
+    return d!=null && d<=0.8; };
   const tries=[];
-  if(p.society && p.society.length>2) tries.push([p.society+", "+(p.locality||"")+", Bengaluru","society"]);
-  if(p.address) tries.push([cleanAddr(p.address)+", "+(p.locality||"")+", Bengaluru","address"]);
-  for(const [q,kind] of tries){
-    try{ const res=await photon(q); await sleep(250); const g=res.find(ok); if(g){ GEO[k]={lat:g.lat,lon:g.lon,q:kind}; geoSave(); return GEO[k]; } }catch{ await sleep(500); }
+  if(p.society && p.society.length>2) tries.push([p.society+", "+(p.locality||"")+", Bengaluru","society", g=>locKey(g.props.name||"").includes(locKey(p.society).slice(0,6))]);
+  if(p.address) tries.push([cleanAddr(p.address)+", "+(p.locality||"")+", Bengaluru","address", g=>!(g.props.osm_key==="place" && locKey(g.props.name||"")===locKey(p.locality||""))]);
+  for(const [q,kind,extra] of tries){
+    try{ const res=await photon(q); await sleep(200); const g=res.find(x=>good(x)&&extra(x)); if(g){ GEO[k]={lat:g.lat,lon:g.lon,q:kind}; geoSave(); return GEO[k]; } }catch{ await sleep(500); }
   }
   if(c){ const [a,b]=hashJit(p.id); GEO[k]={lat:c.lat+a,lon:c.lon+b,q:"area"}; geoSave(); return GEO[k]; }
   return null;
@@ -1082,8 +1089,9 @@ async function loadShared(){
   if(sharedLoaded || !S.sb) return; 
   try{ const {data,error}=await S.sb.from("geo_cache").select("prop_id,lat,lon,q,road").limit(5000);
     if(error||!data) return;
-    const have=new Set(data.map(r=>r.prop_id));
-    for(const r of data){ GEO["L:"+r.prop_id]={lat:r.lat,lon:r.lon,q:r.q||"address"};
+    const rows=data.filter(r=>String(r.q||"").startsWith("v2:")); // older pins (before the locality check) are ignored and re-done
+    const have=new Set(rows.map(r=>r.prop_id));
+    for(const r of rows){ GEO["L:"+r.prop_id]={lat:r.lat,lon:r.lon,q:String(r.q).slice(3)};
       for(const [oid,v] of Object.entries(r.road||{})) if(v && typeof v.km==="number") ROAD[r.prop_id+"|"+oid]=v; }
     sharedLoaded=true; geoSave(); roadSave();
     geoPool().forEach(p=>{ if(GEO["L:"+p.id] && !have.has(p.id)) queuePush(p.id); }); render(); if(MAP.map){ drawPins(); if(!MAP.fitted){ fitAll(); MAP.fitted=true; } }
@@ -1094,7 +1102,7 @@ async function flushPush(){
   if(!S.canWrite||!pushQ.size) return; const ids=[...pushQ]; pushQ.clear();
   const rows=ids.map(id=>{ const g=GEO["L:"+id]; if(!g) return null; const road={};
     for(const o of offices()){ const e=ROAD[id+"|"+o.id]; if(e) road[o.id]=e; }
-    return {prop_id:id,lat:g.lat,lon:g.lon,q:g.q||"address",road,updated_at:new Date().toISOString()}; }).filter(Boolean);
+    return {prop_id:id,lat:g.lat,lon:g.lon,q:"v2:"+(g.q||"address"),road,updated_at:new Date().toISOString()}; }).filter(Boolean);
   for(let i=0;i<rows.length;i+=100){ try{ await S.sb.from("geo_cache").upsert(rows.slice(i,i+100)); }catch{} }
 }
 async function geocodeAll(){
