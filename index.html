@@ -788,7 +788,7 @@ const GEO_KEY="fmh_geo_v1", OFFICE_KEY="fmh_offices_v1";
 const DEFAULT_OFFICES=[
   {id:"ey",short:"EY Coral",name:"EY GDS — Coral, Bagmane WTC",lat:12.9791,lon:77.6967,approx:true,geo:"Bagmane World Technology Center, Mahadevapura"},
   {id:"rmz",short:"RMZ Infinity",name:"RMZ Infinity",lat:12.9925,lon:77.6609,approx:true,geo:"RMZ Infinity, Old Madras Road"},
-  {id:"refyne",short:"Refyne",name:"Refyne India",lat:12.9110,lon:77.6445,approx:true,geo:"24th Main Road, HSR Layout Sector 2"}];
+  {id:"refyne",short:"Refyne",name:"Refyne India",lat:12.9145,lon:77.6825,approx:true,geo:"Ambalipura, Bengaluru"}];
 const GEO=(()=>{ try{ return JSON.parse(localStorage.getItem(GEO_KEY)||"{}")||{}; }catch{ return {}; } })();
 function geoSave(){ try{ localStorage.setItem(GEO_KEY, JSON.stringify(GEO)); }catch{} }
 function localOffices(){ try{ return JSON.parse(localStorage.getItem(OFFICE_KEY)||"{}")||{}; }catch{ return {}; } }
