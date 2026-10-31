@@ -108,10 +108,10 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
   <div id="globalMsg"></div>
   <section id="loginView" class="panel" style="display:none">
     <h2 style="margin-top:0">Sign in</h2>
-    <p class="small muted">Enter your email and we'll send you a sign-in link. Only people the owner has invited can see the dashboard.</p>
+    <p class="small muted">Optional. Everyone can view listings without signing in. Sign in only if you want to shortlist, comment, vote or change preferences. Once signed in, you stay signed in on this device.</p>
     <form id="loginForm"><label class="f" for="loginEmail">Email</label>
       <input id="loginEmail" type="email" autocomplete="email" required placeholder="you@example.com">
-      <div class="actions"><button class="primary" type="submit" id="loginBtn">Email me a sign-in link</button></div></form>
+      <div class="actions"><button class="primary" type="submit" id="loginBtn">Email me a sign-in link</button><button type="button" id="loginClose">Not now</button></div></form>
     <p class="small muted" id="loginMsg"></p>
   </section>
   <section id="notMember" class="panel" style="display:none">
@@ -515,7 +515,7 @@ function renderPrefs(){
   const facings=["East","West","North","South","North-East","North-West","South-East","South-West"];
   const commuteRows=Object.entries(pr.commute||{}).map(([k,c])=>`<tr><td>${esc(k)}</td><td>${c.minMin}–${c.maxMin} min</td><td>${c.km?("~"+c.km+" km"):""}</td></tr>`).join("");
   el.innerHTML=`
-  ${ro?`<div class="banner warn">View only. The owner manages preferences.</div>`:""}
+  ${ro?`<div class="banner warn">${S.session?"View only. The owner manages preferences.":"View only. Sign in (below) to change preferences."}</div>`:""}
   <div class="panel">
     <b>Search</b>
     <label class="chip" style="margin-top:8px"><input type="checkbox" id="pEnabled" ${pr.searchEnabled?"checked":""} ${ro?"disabled":""}> Daily automatic search is ON</label>
@@ -541,16 +541,19 @@ function renderPrefs(){
     <p class="muted" style="margin:4px 0 8px">Rough driving-time ranges from the locality to EY Coral at office hours. They are locality-level estimates, not routed per address, and use no live traffic. Treat them as a guide and check with a maps app before deciding.</p>
     <table class="rep">${commuteRows}</table>
   </div>
-  <div class="panel small">
+  ${!S.session?`<div class="panel small"><b>Sign in (optional)</b>
+    <p class="muted" style="margin:4px 0 8px">You can view everything without signing in. Sign in to shortlist, comment, vote, keep private notes or edit preferences.</p>
+    <div class="actions"><button class="primary" id="openLogin">Sign in</button></div></div>`:`<div class="panel small">
     <b>People</b>
     <p class="muted" style="margin:4px 0 8px">People listed here can sign in with their email and see the dashboard, the shortlist, comments and votes. Private notes stay private.</p>
     <table class="rep">${S.members.map(m=>`<tr><td>${esc(m.email)}</td><td>${esc(m.role)}</td><td>${(!ro&&m.role!=="owner")?`<a href="#settings" data-rm="${esc(m.email)}">Remove</a>`:""}</td></tr>`).join("")}</table>
     ${ro?"":`<form id="inviteForm" class="cmtform"><input type="email" id="inviteEmail" placeholder="friend@example.com" aria-label="Email to invite"><button type="submit">Invite</button></form>
     <p class="muted" style="margin-top:6px">After inviting, send them the site link. They sign in with that email.</p>`}
     <div class="actions"><button id="signOutBtn">Sign out (${esc(S.email||"")})</button></div>
-  </div>`;
+  </div>`}`;
   const sp=$("#savePrefs"); if(sp) sp.onclick=savePrefs;
   const so=$("#signOutBtn"); if(so) so.onclick=signOut;
+  const ol=$("#openLogin"); if(ol) ol.onclick=()=>{ $("#loginView").style.display=""; window.scrollTo({top:0,behavior:"smooth"}); };
   const inv=$("#inviteForm"); if(inv) inv.onsubmit=async e=>{ e.preventDefault(); const em=$("#inviteEmail").value.trim().toLowerCase();
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return toast("Enter a valid email");
     const {error}=await S.sb.from("members").insert({email:em,role:"member"}); if(error) return toast(error.code==="23505"?"Already invited":"Couldn't invite");
@@ -668,7 +671,7 @@ async function signOut(){ await S.sb.auth.signOut(); location.hash=""; location.
 async function startSession(session){
   S.session=session; S.uid=session.user.id; S.email=(session.user.email||"").toLowerCase();
   const {data:me}=await S.sb.from("members").select("email,role").eq("email",S.email).maybeSingle();
-  if(!me){ $("#loginView").style.display="none"; $("#notMember").style.display=""; $("#nmEmail").textContent=S.email; showApp(false); return; }
+  if(!me){ $("#loginView").style.display="none"; $("#notMember").style.display=""; $("#nmEmail").textContent=S.email; showApp(true); route(); await Promise.all([loadListings(), loadPrefs()]); return; }
   S.member=true; S.canWrite=true; S.isOwner = me.role==="owner";
   $("#loginView").style.display="none"; $("#notMember").style.display="none"; showApp(true); route();
   await Promise.all([loadListings(), loadPrefs(), loadShortlist(), loadMarks(), loadComments(), loadVotes(), loadMembers()]);
@@ -679,7 +682,7 @@ async function startSession(session){
 
 (async()=>{
   const cfg=window.FMH_CONFIG||{};
-  if(!window.supabase || !cfg.supabaseUrl){ showGlobal("Setup isn't finished yet (sign-in service not configured).","bad"); showApp(false); return; }
+  if(!window.supabase || !cfg.supabaseUrl){ showApp(true); route(); loadListings(); S.loaded.prefs=true; render(); return; }
   S.sb=window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:"pkce"}});
   showApp(false);
   $("#loginForm").onsubmit=async e=>{ e.preventDefault(); const em=$("#loginEmail").value.trim().toLowerCase(); if(!em) return;
@@ -689,8 +692,10 @@ async function startSession(session){
     $("#loginMsg").textContent = error ? (/rate/i.test(error.message)?"Too many sign-in emails just now. Please wait an hour and try again.":"Couldn't send the link: "+error.message) : "Check your inbox for a link from Supabase and open it on this device.";
   };
   $("#nmSignOut").onclick=signOut;
+  $("#loginClose").onclick=()=>{ $("#loginView").style.display="none"; };
   const {data:{session}}=await S.sb.auth.getSession();
-  if(session) await startSession(session); else $("#loginView").style.display="";
+  if(session) await startSession(session);
+  else { showApp(true); route(); await Promise.all([loadListings(), loadPrefs()]); }
   S.sb.auth.onAuthStateChange((ev,sess)=>{ if(ev==="SIGNED_IN" && sess && !S.member) startSession(sess); });
 })();
 })();
