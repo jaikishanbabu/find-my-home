@@ -52,5 +52,85 @@
     "needsConfirmation": "actual availability, water supply, balcony and exact commute."
    }
   }
- ]
+ ],
+ "prefs": {
+  "searchEnabled": true,
+  "minRent": 30000,
+  "maxRent": 35000,
+  "maxCommute": 30,
+  "localities": [
+   "Kaggadasapura",
+   "Mahadevapura",
+   "Kadubeesanahalli",
+   "Doddanekundi",
+   "Hoodi",
+   "Brookefield"
+  ],
+  "facing": [
+   "East",
+   "West"
+  ],
+  "commute": {
+   "Doddanekundi": {
+    "km": 2,
+    "minMin": 8,
+    "maxMin": 15
+   },
+   "Mahadevapura": {
+    "km": 3,
+    "minMin": 10,
+    "maxMin": 20
+   },
+   "Kaggadasapura": {
+    "km": 4,
+    "minMin": 12,
+    "maxMin": 25
+   },
+   "Brookefield": {
+    "km": 5,
+    "minMin": 15,
+    "maxMin": 30
+   },
+   "Hoodi": {
+    "km": 5,
+    "minMin": 15,
+    "maxMin": 30
+   },
+   "Kadubeesanahalli": {
+    "km": 6,
+    "minMin": 18,
+    "maxMin": 35
+   },
+   "Marathahalli": {
+    "km": 4,
+    "minMin": 12,
+    "maxMin": 25
+   },
+   "C V Raman Nagar": {
+    "km": 6,
+    "minMin": 18,
+    "maxMin": 35
+   },
+   "Panathur": {
+    "km": 7,
+    "minMin": 20,
+    "maxMin": 40
+   },
+   "Munnekollal": {
+    "km": 6,
+    "minMin": 18,
+    "maxMin": 35
+   },
+   "Whitefield": {
+    "km": 9,
+    "minMin": 25,
+    "maxMin": 50
+   },
+   "Bellandur": {
+    "km": 9,
+    "minMin": 25,
+    "maxMin": 50
+   }
+  }
+ }
 }
