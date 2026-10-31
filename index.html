@@ -873,8 +873,8 @@ function renderRun(){
 const GEO_KEY="fmh_geo_v1", OFFICE_KEY="fmh_offices_v1";
 const DEFAULT_OFFICES=[
   {id:"ey",short:"EY Coral",name:"EY GDS — Coral, Bagmane WTC",lat:12.984863,lon:77.695266,approx:false},
-  {id:"rmz",short:"RMZ Infinity",name:"RMZ Infinity",lat:12.9925,lon:77.6609,approx:true,geo:"RMZ Infinity, Old Madras Road"},
-  {id:"refyne",short:"Refyne",name:"Refyne India",lat:12.9145,lon:77.6825,approx:true}];
+  {id:"rmz",short:"RMZ Infinity",name:"RMZ Infinity",lat:12.9941,lon:77.6611,approx:false},
+  {id:"refyne",short:"Refyne",name:"Refyne India",lat:12.9185,lon:77.6787,approx:false}];
 const GEO=(()=>{ try{ return JSON.parse(localStorage.getItem(GEO_KEY)||"{}")||{}; }catch{ return {}; } })();
 function geoSave(){ try{ localStorage.setItem(GEO_KEY, JSON.stringify(GEO)); }catch{} }
 function localOffices(){ try{ return JSON.parse(localStorage.getItem(OFFICE_KEY)||"{}")||{}; }catch{ return {}; } }
