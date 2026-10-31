@@ -25,20 +25,24 @@ nav a.on{background:#fff;color:var(--brand);border-color:#fff}
 main{padding:16px 16px calc(env(safe-area-inset-bottom) + 30px);max-width:850px;margin:0 auto}
 .view{display:none}.view.on{display:block}
 #mapWrap{position:relative;margin:0 -12px}
-#map{height:calc(100vh - 230px);height:calc(100dvh - 230px);min-height:360px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#e8eee9}
+#map{height:calc(100vh - 200px);height:calc(100dvh - 200px);min-height:360px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#e8eee9}
 .pin{background:#fff;color:var(--ink);border:1.5px solid var(--brand);border-radius:999px;padding:3px 7px;font:700 12px/1.2 system-ui,sans-serif;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);transform:translate(-50%,-50%);display:inline-block}
 .pin.m{background:var(--brand);color:#fff}
 .pin.ap{border-style:dashed;opacity:.85}
 .pin.sel{background:var(--fav);border-color:var(--fav);color:#fff;z-index:1000}
 .office{background:#1f4fb8;color:#fff;border:2px solid #fff;border-radius:999px;padding:5px 9px;font:700 12px/1.2 system-ui,sans-serif;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.35);transform:translate(-50%,-100%);display:inline-block;cursor:grab}
 .leaflet-div-icon{background:none;border:0}
-.mapf{display:grid;grid-template-columns:1fr 1fr;gap:0 8px;margin-bottom:8px}
+.mapf{display:grid;grid-template-columns:1fr 1fr;gap:0 8px;margin:0 0 8px;padding:4px 10px 10px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.mapf[hidden]{display:none}
+#mfShow{flex:1 1 auto;width:auto;min-width:0;padding:8px;font-size:15px}
+#mfCount:not(:empty){margin-left:4px;background:var(--brand);color:#fff;border-radius:999px;padding:0 7px;font-size:11px}
+#mapRecenter,#mapOfficeBtn{min-width:40px;padding:8px}
 .mapf label.f{margin:4px 0 3px}
 .mapf select{padding:8px;font-size:15px}
 .pin.sh{border-color:var(--fav)}
 .pin.rj{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
-.mapbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 8px}
-.mapbar .small{flex:1 1 100%}
+.mapbar{display:flex;flex-wrap:nowrap;gap:6px;align-items:center;margin:0 0 6px}
+.mapbar .small{flex:1 1 100%;font-size:12px}
 #mapCard{position:absolute;left:10px;right:10px;bottom:10px;z-index:900;display:none}
 #mapCard.on{display:block}
 #mapCard .mc{background:#fff;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.25);padding:12px 14px}
@@ -190,17 +194,21 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
   </section>
 
   <section class="view" id="v-map">
-    <div class="mapf">
-      <div><label class="f" for="mfShow">Show</label><select id="mfShow"><option value="all">All listings</option><option value="short">Shortlisted</option><option value="rej">Rejected</option><option value="match">Full matches only</option></select></div>
+    <div class="mapbar">
+      <select id="mfShow" aria-label="Show"><option value="all">All listings</option><option value="short">★ Shortlisted</option><option value="rej">Rejected</option><option value="match">Full matches</option></select>
+      <button id="mfBtn" type="button" aria-expanded="false" aria-controls="mfPanel">Filters<span id="mfCount"></span></button>
+      <button id="mapRecenter" type="button" aria-label="Fit all pins" title="Fit all pins">⤢</button>
+      <button id="mapOfficeBtn" type="button" aria-label="Show offices" title="Show offices">🏢</button>
+    </div>
+    <div id="mfPanel" class="mapf" hidden>
       <div><label class="f" for="mfDist">Distance by road</label><select id="mfDist"><option value="">Any distance</option><option value="3">Within 3 km</option><option value="5">Within 5 km</option><option value="8">Within 8 km</option><option value="10">Within 10 km</option><option value="15">Within 15 km</option></select></div>
       <div><label class="f" for="mfFrom">From</label><select id="mfFrom"></select></div>
       <div><label class="f" for="mfRent">Rent</label><select id="mfRent"><option value="">Any rent</option><option value="0-25000">Under ₹25k</option><option value="25000-30000">₹25k – 30k</option><option value="30000-35000">₹30k – 35k</option><option value="35000-40000">₹35k – 40k</option><option value="40000-">₹40k +</option></select></div>
+      <div style="display:flex;align-items:flex-end"><button id="mfClear" type="button" style="width:100%">Clear filters</button></div>
     </div>
-    <div class="mapbar">
-      <button id="mapRecenter" type="button">Fit pins</button>
-      <button id="mapOfficeBtn" type="button">Offices</button>
-      <button id="mapSaveOffice" type="button" style="display:none" class="primary">Save office pins</button>
-      <span class="small muted" id="mapStatus">Loading map…</span>
+    <div class="mapbar" style="margin-top:-2px">
+      <span class="small muted" id="mapStatus" style="flex:1 1 auto">Loading map…</span>
+      <button id="mapSaveOffice" type="button" style="display:none;flex:0 0 auto" class="primary">Save office pins</button>
     </div>
     <div id="mapWrap"><div id="map" role="application" aria-label="Map of listings"></div><div id="mapCard"></div></div>
     <p class="small muted">Blue pins are your offices (EY Coral, RMZ Infinity, Refyne): drag one to move it. Listing pins show rent; green pins match all your main criteria, and dashed pins are approximate (placed at the area centre because the listing has no usable address). Distances are by road (shortest driving route, no traffic). Tap Directions for live driving time. ★ marks shortlisted listings and red pins are rejected ones (shown only when you pick "Rejected"). Use the filters above to narrow the map.</p>
@@ -904,6 +912,11 @@ function wireMapFilters(){
     if(MAP.sel && !mapList().some(p=>p.id===MAP.sel)){ $("#mapCard").classList.remove("on"); MAP.sel=null; }
     drawPins(); mapCount(); };
   ["#mfShow","#mfDist","#mfRent","#mfFrom"].forEach(id=>$(id).onchange=on);
+  const cnt=()=>{ const n=[MF.dist,MF.rent].filter(Boolean).length; $("#mfCount").textContent=n?String(n):""; };
+  ["#mfShow","#mfDist","#mfRent","#mfFrom"].forEach(id=>{ const f=$(id).onchange; $(id).onchange=()=>{ f(); cnt(); }; });
+  $("#mfBtn").onclick=()=>{ const p=$("#mfPanel"); p.hidden=!p.hidden; $("#mfBtn").setAttribute("aria-expanded",String(!p.hidden)); $("#mfBtn").classList.toggle("on",!p.hidden); setTimeout(()=>MAP.map&&MAP.map.invalidateSize(),50); };
+  $("#mfClear").onclick=()=>{ $("#mfDist").value=""; $("#mfRent").value=""; $("#mfFrom").value="any"; on(); cnt(); };
+  cnt();
 }
 function mapCount(){ if(MAP.busy||MAP.dirtyOffice) return; const n=mapList().filter(p=>GEO["L:"+p.id]).length;
   const pending=MF.dist && geoPool().some(p=>GEO["L:"+p.id] && offices().some(o=>roadKm(p,o)==null));
