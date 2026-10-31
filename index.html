@@ -184,12 +184,12 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
   <section class="view" id="v-map">
     <div class="mapbar">
       <button id="mapRecenter" type="button">Show all</button>
-      <button id="mapOfficeBtn" type="button">Go to office</button>
-      <button id="mapSaveOffice" type="button" style="display:none" class="primary">Save office pin</button>
+      <button id="mapOfficeBtn" type="button">Offices</button>
+      <button id="mapSaveOffice" type="button" style="display:none" class="primary">Save office pins</button>
       <span class="small muted" id="mapStatus">Loading map…</span>
     </div>
     <div id="mapWrap"><div id="map" role="application" aria-label="Map of listings"></div><div id="mapCard"></div></div>
-    <p class="small muted">The blue pin is your office: drag it to move it. Listing pins show rent; green pins match all your main criteria, and dashed pins are approximate (placed at the area centre because the listing has no usable address). Distances are straight-line. Tap Directions for real driving time with traffic. The map shows the listings that pass your Listings filters.</p>
+    <p class="small muted">Blue pins are your offices (EY Coral, RMZ Infinity, Refyne): drag one to move it. Listing pins show rent; green pins match all your main criteria, and dashed pins are approximate (placed at the area centre because the listing has no usable address). Distances are straight-line. Tap Directions for real driving time with traffic. The map shows the listings that pass your Listings filters.</p>
   </section>
   <section class="view" id="v-shortlist">
     <div class="banner ok small">The shortlist is shared with anyone you give access to this page. Your notes and contacted/rejected marks stay private to you.</div>
@@ -437,7 +437,7 @@ function cardHTML(p, e){
     ["Facing", p.facing],["Furnishing", p.furnishing],
     ["Security deposit", inr(p.deposit)],["Brokerage", p.brokerageText || (p.brokerage===0?"None":null)],
     ["Commute to EY Coral", commuteText(e.commute)],
-    ["Distance to office", distText(p)],
+    ["Distance to offices", distText(p)],
   ];
   const more = [
     ["Property type", p.propertyType],["Gated community", yn(p.gated)],["Lift", yn(p.lift)],["Parking", p.parking],
@@ -662,8 +662,9 @@ function renderPrefs(){
     ${ro?"":`<div class="actions"><button class="primary" id="savePrefs">Save preferences</button><span id="runSlot" style="display:contents"></span></div><div id="runMsgSlot"></div>`}
   </div>
   <div class="panel small">
-    <b>Workplace</b>
-    <p style="margin:6px 0">${esc(pr.workplace?.name||"")}<br><span class="muted">${esc(pr.workplace?.address||"")}</span></p>
+    <b>Offices</b>
+    ${offices().map(o=>`<p style="margin:6px 0">${esc(o.name)}${o.address?`<br><span class="muted">${esc(o.address)}</span>`:""}</p>`).join("")}
+    <p class="muted" style="margin:4px 0 10px">Distances to all offices are shown on each listing and on the Map. Move an office pin on the Map if it's in the wrong spot.</p>
     <b>Commute estimates by locality</b>
     <p class="muted" style="margin:4px 0 8px">Rough driving-time ranges from the locality to EY Coral at office hours. They are locality-level estimates, not routed per address, and use no live traffic. Treat them as a guide and check with a maps app before deciding.</p>
     <table class="rep">${commuteRows}</table>
@@ -783,20 +784,24 @@ function renderRun(){
   $("#runNowBtn").onclick=async()=>{ if(S.prefsDirty){ const ok=await savePrefs(); if(!ok) return; } runNow(); };
 }
 // ---------- map ----------
-const GEO_KEY="fmh_geo_v1", OFFICE_KEY="fmh_office_v1";
-const DEFAULT_OFFICE={lat:12.9791,lon:77.6967,name:"EY GDS Coral, Bagmane WTC"};
+const GEO_KEY="fmh_geo_v1", OFFICE_KEY="fmh_offices_v1";
+const DEFAULT_OFFICES=[
+  {id:"ey",short:"EY Coral",name:"EY GDS — Coral, Bagmane WTC",lat:12.9791,lon:77.6967,approx:true,geo:"Bagmane World Technology Center, Mahadevapura"},
+  {id:"rmz",short:"RMZ Infinity",name:"RMZ Infinity",lat:12.9925,lon:77.6609,approx:true,geo:"RMZ Infinity, Old Madras Road"},
+  {id:"refyne",short:"Refyne",name:"Refyne India",lat:12.9110,lon:77.6445,approx:true,geo:"24th Main Road, HSR Layout Sector 2"}];
 const GEO=(()=>{ try{ return JSON.parse(localStorage.getItem(GEO_KEY)||"{}")||{}; }catch{ return {}; } })();
 function geoSave(){ try{ localStorage.setItem(GEO_KEY, JSON.stringify(GEO)); }catch{} }
-function officePos(){
-  const w=(S.prefs&&S.prefs.workplace)||{};
-  if(typeof w.lat==="number" && typeof w.lon==="number") return {lat:w.lat,lon:w.lon,name:w.name||DEFAULT_OFFICE.name};
-  try{ const o=JSON.parse(localStorage.getItem(OFFICE_KEY)||"null"); if(o && typeof o.lat==="number") return {...o,name:w.name||DEFAULT_OFFICE.name}; }catch{}
-  return {...DEFAULT_OFFICE, name:w.name||DEFAULT_OFFICE.name};
+function localOffices(){ try{ return JSON.parse(localStorage.getItem(OFFICE_KEY)||"{}")||{}; }catch{ return {}; } }
+function offices(){
+  const base=(S.prefs&&Array.isArray(S.prefs.workplaces)&&S.prefs.workplaces.length)? S.prefs.workplaces : DEFAULT_OFFICES;
+  const loc=localOffices();
+  return base.map(o=>({...o, ...(loc[o.id]||{})}));
 }
+function officePos(){ return offices()[0]; }
 function kmBetween(a,b){ const R=6371,t=x=>x*Math.PI/180; const dLa=t(b.lat-a.lat), dLo=t(b.lon-a.lon);
   const h=Math.sin(dLa/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dLo/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
-function distText(p){ const g=GEO["L:"+p.id]; if(!g) return null; const d=kmBetween(officePos(),g);
-  return `${d<1?d.toFixed(1):d.toFixed(1)} km straight line${g.q==="area"?" (approx., area centre)":""}`; }
+function distText(p){ const g=GEO["L:"+p.id]; if(!g) return null;
+  return offices().map(o=>`${o.short||o.name} ${kmBetween(o,g).toFixed(1)} km`).join(" · ")+` (straight line${g.q==="area"?", approx.":""})`; }
 const photon=async q=>{ const r=await fetch("https://photon.komoot.io/api/?limit=3&lang=en&lat=12.97&lon=77.68&bbox=77.35,12.75,77.90,13.20&q="+encodeURIComponent(q)); if(!r.ok) throw new Error("geo "+r.status);
   const j=await r.json(); return (j.features||[]).filter(f=>/karnataka/i.test((f.properties||{}).state||"")).map(f=>({lat:f.geometry.coordinates[1],lon:f.geometry.coordinates[0]})); };
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -837,18 +842,19 @@ function drawPins(){
 function selectPin(id){
   MAP.sel=id; drawPins();
   const p=S.props.find(x=>x.id===id); if(!p) return;
-  const g=GEO["L:"+id]; const o=officePos(); const d=g?kmBetween(o,g):null;
-  const dir=g?`https://www.google.com/maps/dir/?api=1&origin=${g.lat},${g.lon}&destination=${o.lat},${o.lon}&travelmode=driving`:null;
+  const g=GEO["L:"+id]; const offs=offices();
   const el=$("#mapCard");
+  const rows=g? offs.map(o=>{ const dir=`https://www.google.com/maps/dir/?api=1&origin=${g.lat},${g.lon}&destination=${o.lat},${o.lon}&travelmode=driving`;
+      return `<div class="small" style="display:flex;gap:8px;align-items:center;margin:3px 0"><span class="dist" style="margin:0">${esc(o.short||o.name)}: ${kmBetween(o,g).toFixed(1)} km</span><span class="muted" data-road="${esc(o.id)}"></span><a href="${dir}" target="_blank" rel="noopener" style="margin-left:auto">Directions</a></div>`; }).join("") : "";
   el.innerHTML=`<div class="mc"><button class="x" id="mcClose" aria-label="Close">×</button>
     <h3>${esc(p.title||"Listing")}</h3>
     <div><b>${esc(inr(p.rent)||"")}</b>${p.maintenance?` <span class="small muted">+ ${esc(inr(p.maintenance))} maint.</span>`:""} <span class="small muted">· ${esc(p.locality||"")}</span></div>
-    ${d!=null?`<span class="dist">${d.toFixed(1)} km to office (straight line)${g.q==="area"?" · approx.":""}</span> <span class="small muted" id="mcRoad"></span>`:""}
     <div class="small muted">${esc([p.furnishing,p.areaSqft?p.areaSqft+" sq ft":null,p.facing?p.facing+" facing":null,p.parking?("Parking: "+p.parking):null].filter(Boolean).join(" · "))}</div>
-    <div class="actions"><a class="btn primary" href="${esc(p.url)}" target="_blank" rel="noopener">Open listing ↗</a>${dir?`<a class="btn" href="${dir}" target="_blank" rel="noopener">Directions</a>`:""}</div></div>`;
+    ${rows}${g&&g.q==="area"?`<div class="small muted">Pin is approximate (area centre).</div>`:""}
+    <div class="actions"><a class="btn primary" href="${esc(p.url)}" target="_blank" rel="noopener">Open listing ↗</a></div></div>`;
   el.classList.add("on");
   $("#mcClose").onclick=()=>{ el.classList.remove("on"); MAP.sel=null; drawPins(); };
-  if(g) roadDist(g,o).then(t=>{ const r=$("#mcRoad"); if(r&&t&&MAP.sel===id) r.textContent=t; });
+  if(g) offs.forEach(o=>roadDist(g,o).then(t=>{ const r=el.querySelector(`[data-road="${o.id}"]`); if(r&&t&&MAP.sel===id) r.textContent=t; }));
 }
 async function roadDist(g,o){
   try{ const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${g.lon},${g.lat};${o.lon},${o.lat}?overview=false`); if(!r.ok) return null;
@@ -856,27 +862,31 @@ async function roadDist(g,o){
     return `≈ ${(rt.distance/1000).toFixed(1)} km by road`; }catch{ return null; }
 }
 function placeOffice(){
-  const o=officePos();
-  const icon=L.divIcon({className:"",html:`<span class="office">🏢 Office</span>`,iconSize:null});
-  if(MAP.office) MAP.office.setLatLng([o.lat,o.lon]);
-  else { MAP.office=L.marker([o.lat,o.lon],{icon,draggable:true,zIndexOffset:2000,title:"Office (drag to move)"}).addTo(MAP.map);
-    MAP.office.on("dragend",()=>{ const ll=MAP.office.getLatLng(); const v={lat:+ll.lat.toFixed(6),lon:+ll.lng.toFixed(6)};
-      try{ localStorage.setItem(OFFICE_KEY, JSON.stringify(v)); }catch{}
-      if(S.prefs) S.prefs.workplace={...(S.prefs.workplace||{}),...v};
+  MAP.offices=MAP.offices||{};
+  for(const o of offices()){
+    const label=`🏢 ${esc(o.short||o.name)}`;
+    const icon=L.divIcon({className:"",html:`<span class="office">${label}</span>`,iconSize:null});
+    let m=MAP.offices[o.id];
+    if(m){ m.setLatLng([o.lat,o.lon]); continue; }
+    m=L.marker([o.lat,o.lon],{icon,draggable:true,zIndexOffset:2000,title:(o.name||"Office")+" (drag to move)"}).addTo(MAP.map);
+    m.on("dragend",()=>{ const ll=m.getLatLng(); const loc=localOffices(); loc[o.id]={lat:+ll.lat.toFixed(6),lon:+ll.lng.toFixed(6),approx:false};
+      try{ localStorage.setItem(OFFICE_KEY, JSON.stringify(loc)); }catch{}
       MAP.dirtyOffice=true; $("#mapSaveOffice").style.display=S.canWrite?"":"none";
-      $("#mapStatus").textContent=S.canWrite?"Office moved. Tap Save office pin to keep it for everyone.":"Office moved on this device. Enter the passcode to save it for everyone.";
+      $("#mapStatus").textContent=S.canWrite?`${o.short||o.name} moved. Tap Save office pins to keep it for everyone.`:`${o.short||o.name} moved on this device. Enter the passcode to save it for everyone.`;
       if(MAP.sel) selectPin(MAP.sel); render(); });
+    MAP.offices[o.id]=m;
   }
 }
 async function saveOffice(){
-  const v=officePos(); const data={...S.prefs, workplace:{...(S.prefs.workplace||{}),lat:v.lat,lon:v.lon}};
+  const offs=offices().map(o=>({...o})); const data={...S.prefs, workplaces:offs};
   const {error}=await S.sb.from("prefs").update({data, updated_at:new Date().toISOString()}).eq("id",1);
-  if(error) return toast("Couldn't save the office pin");
-  S.prefs=data; MAP.dirtyOffice=false; $("#mapSaveOffice").style.display="none"; $("#mapStatus").textContent="Office pin saved."; toast("Office pin saved");
+  if(error) return toast("Couldn't save the office pins");
+  S.prefs=data; try{ localStorage.removeItem(OFFICE_KEY); }catch{}
+  MAP.dirtyOffice=false; $("#mapSaveOffice").style.display="none"; $("#mapStatus").textContent="Office pins saved."; toast("Office pins saved");
 }
 function fitAll(){
-  const pts=mapList().map(p=>GEO["L:"+p.id]).filter(Boolean).map(g=>[g.lat,g.lon]); const o=officePos(); pts.push([o.lat,o.lon]);
-  if(pts.length>1) MAP.map.fitBounds(pts,{padding:[30,30],maxZoom:15}); else MAP.map.setView([o.lat,o.lon],13);
+  const pts=mapList().map(p=>GEO["L:"+p.id]).filter(Boolean).map(g=>[g.lat,g.lon]); offices().forEach(o=>pts.push([o.lat,o.lon]));
+  if(pts.length>1) MAP.map.fitBounds(pts,{padding:[30,30],maxZoom:15}); else { const o=officePos(); MAP.map.setView([o.lat,o.lon],13); }
 }
 async function geocodeAll(){
   if(MAP.busy) return; MAP.busy=true;
@@ -901,14 +911,14 @@ window.mapShow=function(){
     MAP.layer=L.layerGroup().addTo(MAP.map);
     placeOffice();
     $("#mapRecenter").onclick=fitAll;
-    $("#mapOfficeBtn").onclick=()=>{ const o=officePos(); MAP.map.setView([o.lat,o.lon],15); };
+    $("#mapOfficeBtn").onclick=()=>{ const pts=offices().map(o=>[o.lat,o.lon]); MAP.map.fitBounds(pts,{padding:[40,40],maxZoom:15}); };
     $("#mapSaveOffice").onclick=saveOffice;
   } else { MAP.map.invalidateSize(); placeOffice(); }
-  const w=(S.prefs&&S.prefs.workplace)||{};
-  if(typeof w.lat!=="number" && !MAP.triedOffice){ MAP.triedOffice=true;
-    photon("Bagmane World Technology Center, Mahadevapura").then(res=>{ const g=res.find(x=>kmBetween(DEFAULT_OFFICE,x)<3);
-      let saved=null; try{ saved=localStorage.getItem(OFFICE_KEY); }catch{}
-      if(g && !saved){ DEFAULT_OFFICE.lat=g.lat; DEFAULT_OFFICE.lon=g.lon; placeOffice(); drawPins(); } }).catch(()=>{}); }
+  if(!MAP.triedOffice){ MAP.triedOffice=true; const loc=localOffices();
+    offices().filter(o=>o.approx && o.geo && !loc[o.id]).forEach((o,i)=>setTimeout(()=>photon(o.geo).then(res=>{
+      const g=res.find(x=>kmBetween(o,x)<2.5); if(!g) return; const l2=localOffices(); if(l2[o.id]) return;
+      MAP.refined=MAP.refined||{}; MAP.refined[o.id]={lat:g.lat,lon:g.lon}; const m=MAP.offices&&MAP.offices[o.id]; if(m) m.setLatLng([g.lat,g.lon]);
+      const base=(S.prefs&&S.prefs.workplaces)||[]; const t=base.find(x=>x.id===o.id); if(t){ t.lat=g.lat; t.lon=g.lon; } if(MAP.sel) selectPin(MAP.sel); render(); }).catch(()=>{}), i*400)); }
   drawPins();
   if(!MAP.fitted && mapList().some(p=>GEO["L:"+p.id])){ fitAll(); MAP.fitted=true; }
   if(S.loaded.props) geocodeAll(); else $("#mapStatus").textContent="Loading listings…";
