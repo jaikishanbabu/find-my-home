@@ -32,6 +32,14 @@ main{padding:16px 16px calc(env(safe-area-inset-bottom) + 30px);max-width:850px;
 .pin.sel{background:var(--fav);border-color:var(--fav);color:#fff;z-index:1000}
 .office{background:#1f4fb8;color:#fff;border:2px solid #fff;border-radius:999px;padding:5px 9px;font:700 12px/1.2 system-ui,sans-serif;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.35);transform:translate(-50%,-100%);display:inline-block;cursor:grab}
 .leaflet-div-icon{background:none;border:0}
+.msearch{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px 4px 4px 12px;margin:0 0 6px;box-shadow:0 2px 8px rgba(0,0,0,.06);color:#6b7c75}
+.msearch input{border:0;padding:8px 0;flex:1 1 auto;min-width:0;background:none}
+.msearch input:focus{outline:none}
+#mfN{font-size:13px;white-space:nowrap}
+#mfBtn{background:none;border:0;color:var(--ink);position:relative;min-width:44px}
+#mfCount:not(:empty){position:absolute;top:2px;right:2px;margin:0}
+#mfSheet{z-index:3000}
+.opt.radio input{display:none}
 .mapf{display:grid;grid-template-columns:1fr 1fr;gap:0 8px;margin:0 0 8px;padding:4px 10px 10px;border:1px solid var(--line);border-radius:12px;background:#fff}
 .mapf[hidden]{display:none}
 #mfShow{flex:1 1 auto;width:auto;min-width:0;padding:8px;font-size:15px}
@@ -194,20 +202,16 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
   </section>
 
   <section class="view" id="v-map">
-    <div class="mapbar">
-      <select id="mfShow" aria-label="Show"><option value="all">All listings</option><option value="short">★ Shortlisted</option><option value="rej">Rejected</option><option value="match">Full matches</option></select>
-      <button id="mfBtn" type="button" aria-expanded="false" aria-controls="mfPanel">Filters<span id="mfCount"></span></button>
-      <button id="mapRecenter" type="button" aria-label="Fit all pins" title="Fit all pins">⤢</button>
-      <button id="mapOfficeBtn" type="button" aria-label="Show offices" title="Show offices">🏢</button>
-    </div>
-    <div id="mfPanel" class="mapf" hidden>
-      <div><label class="f" for="mfDist">Distance by road</label><select id="mfDist"><option value="">Any distance</option><option value="3">Within 3 km</option><option value="5">Within 5 km</option><option value="8">Within 8 km</option><option value="10">Within 10 km</option><option value="15">Within 15 km</option></select></div>
-      <div><label class="f" for="mfFrom">From</label><select id="mfFrom"></select></div>
-      <div><label class="f" for="mfRent">Rent</label><select id="mfRent"><option value="">Any rent</option><option value="0-25000">Under ₹25k</option><option value="25000-30000">₹25k – 30k</option><option value="30000-35000">₹30k – 35k</option><option value="35000-40000">₹35k – 40k</option><option value="40000-">₹40k +</option></select></div>
-      <div style="display:flex;align-items:flex-end"><button id="mfClear" type="button" style="width:100%">Clear filters</button></div>
+    <div class="msearch">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="mfQ" type="search" placeholder="Search society, area or title" aria-label="Search listings on the map" autocomplete="off">
+      <span id="mfN" class="muted"></span>
+      <button id="mfBtn" type="button" aria-label="Filters" aria-haspopup="dialog"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg><span id="mfCount"></span></button>
     </div>
     <div class="mapbar" style="margin-top:-2px">
       <span class="small muted" id="mapStatus" style="flex:1 1 auto">Loading map…</span>
+      <button id="mapRecenter" type="button" aria-label="Fit all pins" title="Fit all pins">⤢</button>
+      <button id="mapOfficeBtn" type="button" aria-label="Show offices" title="Show offices">🏢</button>
       <button id="mapSaveOffice" type="button" style="display:none;flex:0 0 auto" class="primary">Save office pins</button>
     </div>
     <div id="mapWrap"><div id="map" role="application" aria-label="Map of listings"></div><div id="mapCard"></div></div>
@@ -240,6 +244,14 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
   <div class="actions"><button class="primary" id="applyFilters">Show results</button><button id="resetFilters">Reset</button></div>
 </div></div>
 
+<div class="sheet" id="mfSheet" role="dialog" aria-modal="true" aria-labelledby="mfTitle"><div class="inner">
+  <div style="display:flex;align-items:center;justify-content:space-between"><h3 id="mfTitle">Filter map</h3><button type="button" id="mfClear" style="border:0;background:none">Clear all</button></div>
+  <label class="f">Show</label><div class="opts" id="mfgShow"></div>
+  <label class="f">Distance by road</label><div class="opts three" id="mfgDist"></div>
+  <label class="f">From office</label><div class="opts" id="mfgFrom"></div>
+  <label class="f">Rent</label><div class="opts three" id="mfgRent"></div>
+  <div class="actions" style="margin-top:14px"><button class="primary" type="button" id="mfDone" style="width:100%"><span id="mfDoneN"></span></button></div>
+</div></div>
 <div class="sheet" id="shareSheet"><div class="inner">
   <h3>Share this property</h3>
   <p class="small muted">Shares a summary and the original listing link only. No notes or dashboard access.</p>
@@ -933,36 +945,56 @@ const MF=(()=>{ try{ return JSON.parse(localStorage.getItem("fmh_mapf")||"{}")||
 function mfSave(){ try{ localStorage.setItem("fmh_mapf", JSON.stringify(MF)); }catch{} }
 function geoPool(){ return S.props.filter(p=>p.status!=="gone"); }
 function mapList(){
-  const show=MF.show||"all";
+  const show=MF.show||"all"; const qq=norm(MF.q||"");
   let arr=geoPool().filter(p=>{ const rej=!!(S.marks[p.id]||{}).rejected;
     if(show==="rej") return rej;
     if(rej) return false;
     if(show==="short") return !!S.shortlist[p.id];
     if(show==="match") return evaluate(p).majorOk;
     return true; });
+  if(qq) arr=arr.filter(p=>norm([p.title,p.society,p.locality,p.address].filter(Boolean).join(" ")).includes(qq));
   if(MF.rent){ const [lo,hi]=MF.rent.split("-").map(x=>x===""?null:+x); arr=arr.filter(p=>typeof p.rent==="number" && (lo==null||p.rent>=lo) && (hi==null||p.rent<=hi)); }
   if(MF.dist){ const max=+MF.dist; const offs=offices().filter(o=>!MF.from||MF.from==="any"||o.id===MF.from);
     arr=arr.filter(p=>offs.some(o=>{ const km=roadKm(p,o); return km!=null && km<=max; })); }
   return arr;
 }
+const MF_OPTS={
+  show:[["all","All listings"],["short","★ Shortlisted"],["rej","Rejected"],["match","Full matches"]],
+  dist:[["","Any"],["3","≤ 3 km"],["5","≤ 5 km"],["8","≤ 8 km"],["10","≤ 10 km"],["15","≤ 15 km"]],
+  rent:[["","Any"],["0-25000","< ₹25k"],["25000-30000","₹25–30k"],["30000-35000","₹30–35k"],["35000-40000","₹35–40k"],["40000-","₹40k +"]]};
+function mfGroup(el,key,opts,def){
+  const cur=MF[key]||def;
+  el.innerHTML=opts.map(([v,l])=>`<label class="opt radio ${cur===v?"on":""}"><input type="radio" name="mf_${key}" value="${esc(v)}" ${cur===v?"checked":""}>${esc(l)}</label>`).join("");
+  el.querySelectorAll("input").forEach(i=>i.onchange=()=>{ MF[key]=i.value; mfApply(); });
+}
+function mfRenderSheet(){
+  mfGroup($("#mfgShow"),"show",MF_OPTS.show,"all");
+  mfGroup($("#mfgDist"),"dist",MF_OPTS.dist,"");
+  mfGroup($("#mfgFrom"),"from",[["any","Any office"],...offices().map(o=>[o.id,o.short||o.name])],"any");
+  mfGroup($("#mfgRent"),"rent",MF_OPTS.rent,"");
+  $("#mfgFrom").style.opacity=MF.dist?"1":".5";
+  const n=mapList().length; $("#mfDoneN").textContent=`Show ${n} listing${n===1?"":"s"}`;
+}
+function mfApply(){
+  mfSave(); mfRenderSheet();
+  const n=[MF.show&&MF.show!=="all",MF.dist,MF.rent].filter(Boolean).length; $("#mfCount").textContent=n?String(n):"";
+  if(MAP.sel && !mapList().some(p=>p.id===MAP.sel)){ $("#mapCard").classList.remove("on"); MAP.sel=null; }
+  drawPins(); mapCount();
+}
 function wireMapFilters(){
-  const from=$("#mfFrom"); const offs=offices();
-  from.innerHTML=`<option value="any">Any office</option>`+offs.map(o=>`<option value="${esc(o.id)}">${esc(o.short||o.name)}</option>`).join("");
-  $("#mfShow").value=MF.show||"all"; $("#mfDist").value=MF.dist||""; $("#mfRent").value=MF.rent||""; from.value=MF.from||"any";
-  from.disabled=!MF.dist;
-  const on=()=>{ MF.show=$("#mfShow").value; MF.dist=$("#mfDist").value; MF.rent=$("#mfRent").value; MF.from=from.value; from.disabled=!MF.dist; mfSave();
-    if(MAP.sel && !mapList().some(p=>p.id===MAP.sel)){ $("#mapCard").classList.remove("on"); MAP.sel=null; }
-    drawPins(); mapCount(); };
-  ["#mfShow","#mfDist","#mfRent","#mfFrom"].forEach(id=>$(id).onchange=on);
-  const cnt=()=>{ const n=[MF.dist,MF.rent].filter(Boolean).length; $("#mfCount").textContent=n?String(n):""; };
-  ["#mfShow","#mfDist","#mfRent","#mfFrom"].forEach(id=>{ const f=$(id).onchange; $(id).onchange=()=>{ f(); cnt(); }; });
-  $("#mfBtn").onclick=()=>{ const p=$("#mfPanel"); p.hidden=!p.hidden; $("#mfBtn").setAttribute("aria-expanded",String(!p.hidden)); $("#mfBtn").classList.toggle("on",!p.hidden); setTimeout(()=>MAP.map&&MAP.map.invalidateSize(),50); };
-  $("#mfClear").onclick=()=>{ $("#mfDist").value=""; $("#mfRent").value=""; $("#mfFrom").value="any"; on(); cnt(); };
-  cnt();
+  const q=$("#mfQ"); q.value=MF.q||"";
+  let t=null; q.oninput=()=>{ clearTimeout(t); t=setTimeout(()=>{ MF.q=q.value.trim(); mfApply(); },200); };
+  const sh=$("#mfSheet");
+  $("#mfBtn").onclick=()=>{ mfRenderSheet(); sh.classList.add("on"); };
+  $("#mfDone").onclick=()=>{ sh.classList.remove("on"); fitAll(); };
+  sh.onclick=e=>{ if(e.target===sh) sh.classList.remove("on"); };
+  $("#mfClear").onclick=()=>{ MF.show="all"; MF.dist=""; MF.rent=""; MF.from="any"; mfApply(); };
+  mfApply();
 }
 function mapCount(){ if(MAP.busy||MAP.dirtyOffice) return; const n=mapList().filter(p=>GEO["L:"+p.id]).length;
   const pending=MF.dist && geoPool().some(p=>GEO["L:"+p.id] && offices().some(o=>roadKm(p,o)==null));
-  $("#mapStatus").textContent=`${n} listing${n===1?"":"s"} shown${pending?" (still calculating some road distances)":""}.`; }
+  const tot=geoPool().filter(p=>!(S.marks[p.id]||{}).rejected).length; $("#mfN").textContent=`${mapList().length}/${tot}`;
+  $("#mapStatus").textContent=`${n} listing${n===1?"":"s"} on the map${pending?" · calculating road distances…":""}`; }
 function drawPins(){
   if(!MAP.map) return;
   MAP.layer.clearLayers(); MAP.markers={};
