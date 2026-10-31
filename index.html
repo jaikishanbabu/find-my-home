@@ -927,15 +927,20 @@ function hashJit(id){ let h=0; for(const c of id) h=(h*31+c.charCodeAt(0))|0; re
 function locKey(n){ return norm(n).replace(/(.)\1+/g,"$1").replace(/halli$/,"hali").replace(/y$/,"i"); }
 function placeText(pr){ return locKey([pr.name,pr.district,pr.locality,pr.suburb,pr.city,pr.county,pr.street].filter(Boolean).join(" ")); }
 function inLocality(pr,loc){ const k=locKey(loc).slice(0,7); return k.length>=4 && placeText(pr).includes(k); }
+// Rough locality centres so every listing gets a pin straight away, even before the map service answers.
+const AREA_CENTRES={kaggadasapura:[12.9845,77.6790],mahadevapura:[12.9910,77.6960],kadubeesanahalli:[12.9370,77.6970],doddanekundi:[12.9740,77.6990],
+  hoodi:[12.9920,77.7160],brookefield:[12.9660,77.7180],marathahalli:[12.9560,77.7010],cvramannagar:[12.9850,77.6630],panathur:[12.9370,77.7110],
+  munnekollal:[12.9500,77.7110],whitefield:[12.9700,77.7500],bellandur:[12.9260,77.6760]};
+function quickCentre(loc){ const k="A:"+norm(loc); if(GEO[k]) return GEO[k]; const c=AREA_CENTRES[norm(loc)]; return c?{lat:c[0],lon:c[1]}:null; }
 async function areaCentre(loc){
   const k="A:"+norm(loc); if(GEO[k]) return GEO[k];
   const res=await photon(loc+", Bengaluru"); await sleep(200);
   const g=res.find(x=>locKey(x.props.name||"").includes(locKey(loc).slice(0,7))) || null;
-  if(g){ GEO[k]={lat:g.lat,lon:g.lon,t:Date.now()}; geoSave(); return GEO[k]; } return null;
+  if(g){ GEO[k]={lat:g.lat,lon:g.lon,t:Date.now()}; geoSave(); return GEO[k]; } return quickCentre(loc);
 }
 function cleanAddr(a){ return String(a||"").replace(/\b(near|opp\.?|opposite|beside|behind|next to)\b/gi," ").replace(/\s+/g," ").trim(); }
 async function geocodeListing(p){
-  const k="L:"+p.id; if(GEO[k]) return GEO[k];
+  const k="L:"+p.id; if(GEO[k] && !GEO[k].tmp) return GEO[k];
   const c=p.locality? await areaCentre(p.locality) : null;
   // A match counts only if the map service puts it in the listing's own locality (or very close to its centre).
   const good=g=>{ if(!g) return false; const d=c?kmBetween(c,g):null;
@@ -1108,11 +1113,14 @@ async function flushPush(){
 async function geocodeAll(){
   if(MAP.busy) return; MAP.busy=true;
   await loadShared();
-  const todo=geoPool().filter(p=>!GEO["L:"+p.id]);
+  const todo=geoPool().filter(p=>!GEO["L:"+p.id] || GEO["L:"+p.id].tmp);
+  todo.forEach(p=>{ if(GEO["L:"+p.id]) return; const c=p.locality&&quickCentre(p.locality); if(c){ const [a,b]=hashJit(p.id); GEO["L:"+p.id]={lat:c.lat+a,lon:c.lon+b,q:"area",tmp:true}; } });
+  drawPins(); if(MAP.map && !MAP.fitted && todo.length){ fitAll(); MAP.fitted=true; } render();
+  if(todo.length) $("#mapStatus").textContent=`Fine-tuning pin locations… 0/${todo.length}`;
   let n=0, i=0;
   const worker=async()=>{ while(i<todo.length){ const p=todo[i++];
     try{ if(await geocodeListing(p)) queuePush(p.id); }catch{}
-    n++; $("#mapStatus").textContent=`Placing new listings on the map… ${n}/${todo.length}`;
+    n++; $("#mapStatus").textContent=`Fine-tuning pin locations… ${n}/${todo.length}`;
     if(n%4===0) drawPins(); } };
   await Promise.all([worker(),worker()]);
   MAP.busy=false; drawPins(); roadAll();
