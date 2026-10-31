@@ -81,7 +81,7 @@ button.primary,.btn.primary{background:var(--brand);color:#fff;border-color:var(
 button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
 button:disabled{opacity:.5}
 button[data-act="rejected"],button[data-reject]{background:var(--bad-soft);color:var(--bad);border-color:#f3c4bd}
-button[data-act="rejected"].on{background:var(--bad);color:#fff;border-color:var(--bad)}
+button[data-act="rejected"].on{background:#fff;color:var(--bad);border-color:var(--bad)}
 textarea,input,select{font:inherit;font-size:16px;width:100%;padding:11px 10px;border:1px solid #d8e2dc;border-radius:10px;background:#fff;color:var(--ink)}
 textarea{min-height:80px}
 label.f{display:block;font-size:12px;font-weight:650;color:#496159;margin:12px 0 5px}
@@ -136,6 +136,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
     <a href="#listings" data-v="listings">Listings</a>
     <a href="#map" data-v="map">Map</a>
     <a href="#shortlist" data-v="shortlist">Shortlist</a>
+    <a href="#rejected" data-v="rejected">Rejected</a>
     <a href="#report" data-v="report">Daily report</a>
     <a href="#settings" data-v="settings">Preferences</a>
   </nav>
@@ -192,6 +193,10 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
     </div>
     <div id="mapWrap"><div id="map" role="application" aria-label="Map of listings"></div><div id="mapCard"></div></div>
     <p class="small muted">Blue pins are your offices (EY Coral, RMZ Infinity, Refyne): drag one to move it. Listing pins show rent; green pins match all your main criteria, and dashed pins are approximate (placed at the area centre because the listing has no usable address). Distances are by road (shortest driving route, no traffic). Tap Directions for live driving time. Rejected listings are hidden. The map shows the listings that pass your Listings filters.</p>
+  </section>
+  <section class="view" id="v-rejected">
+    <div class="banner warn small">Listings you rejected on this device. They're hidden from the dashboard, listings and map. Tap ☆ Shortlist to bring one back onto your shortlist, or Restore to just un-reject it.</div>
+    <div id="rejList"></div>
   </section>
   <section class="view" id="v-shortlist">
     <div class="banner ok small">The shortlist is shared with anyone you give access to this page. Your notes and contacted/rejected marks stay private to you.</div>
@@ -263,7 +268,7 @@ const S = { sb:null, session:null, email:null, uid:null, member:false, canWrite:
   loaded:{props:false,prefs:false}, filters: lsGet("fmh.filters", {}), sort: lsGet("fmh.sort","score") };
 
 // ---------- routing ----------
-const VIEWS = ["home","listings","map","shortlist","report","settings"];
+const VIEWS = ["home","listings","map","shortlist","rejected","report","settings"];
 function route(){
   const h = location.hash.replace("#","");
   const v = VIEWS.includes(h) ? h : "home";
@@ -467,7 +472,7 @@ function cardHTML(p, e){
       <button data-act="share">Share</button>
       ${S.uid?`<button data-act="contacted" class="${m.contacted?"on":""}">${m.contacted?"✓ Contacted":"Mark contacted"}</button>
       <button data-act="confirmed" class="${m.confirmed?"on":""}">${m.confirmed?"✓ Available":"Confirm available"}</button>
-      <button data-act="rejected" class="${m.rejected?"on":""}">${m.rejected?"Rejected":"Reject"}</button>
+      <button data-act="rejected" class="${m.rejected?"on":""}">${m.rejected?"↺ Restore":"Reject"}</button>
       <button data-act="note">${m.notes?"Edit note":"Add note"}</button>`:""}
     </div>
     ${S.member?votesHTML(p):""}
@@ -526,7 +531,7 @@ async function toggleFav(p){
   if(!S.member) return;
   let error;
   if (S.shortlist[p.id]) ({error}=await S.sb.from("shortlist").delete().eq("prop_id",p.id));
-  else ({error}=await S.sb.from("shortlist").insert({prop_id:p.id,added_by:S.uid,added_by_email:S.email}));
+  else { ({error}=await S.sb.from("shortlist").insert({prop_id:p.id,added_by:S.uid,added_by_email:S.email})); if(!error && (S.marks[p.id]||{}).rejected) saveMark(p.id,{rejected:false}); }
   if(error) return toast("Couldn't update shortlist");
   toast(S.shortlist[p.id]?"Removed from shortlist":"Added to shortlist"); await loadShortlist();
 }
@@ -773,6 +778,12 @@ function renderList(){
   $("#listCount").textContent = `${arr.length} of ${S.props.length} listings`;
   $("#list").innerHTML = arr.length? arr.map(x=>cardHTML(x.p,x.e)).join("") : `<div class="empty">No listings match these filters.</div>`;
 }
+function renderRejected(){
+  const el=$("#rejList"); if(!el) return;
+  if(!S.canWrite){ el.innerHTML=`<div class="empty">Enter the passcode to see and manage rejected listings.</div>`; return; }
+  const arr=S.props.filter(p=>(S.marks[p.id]||{}).rejected);
+  el.innerHTML = arr.length? sorted(arr).map(x=>cardHTML(x.p,x.e)).join("") : `<div class="empty">Nothing rejected yet.</div>`;
+}
 function renderShortlist(){
   const ids=Object.keys(S.shortlist); const arr=ids.map(id=>S.props.find(p=>p.id===id)).filter(Boolean);
   $("#favList").innerHTML = arr.length? sorted(arr).map(x=>cardHTML(x.p,x.e)).join("") : `<div class="empty">Nothing shortlisted yet. Tap ☆ Shortlist on a listing.</div>`;
@@ -956,7 +967,7 @@ window.mapShow=function(){
   if(S.loaded.props) geocodeAll(); else $("#mapStatus").textContent="Loading listings…";
 };
 let rq=false;
-function render(){ if(rq) return; rq=true; requestAnimationFrame(()=>{ rq=false; renderHome(); renderList(); renderShortlist(); renderReport(); renderPrefs(); renderRun(); if(MAP.map && $("#v-map").classList.contains("on")){ drawPins(); if(S.loaded.props && !MAP.busy && mapList().some(p=>!GEO["L:"+p.id])) geocodeAll(); } }); }
+function render(){ if(rq) return; rq=true; requestAnimationFrame(()=>{ rq=false; renderHome(); renderList(); renderShortlist(); renderRejected(); renderReport(); renderPrefs(); renderRun(); if(MAP.map && $("#v-map").classList.contains("on")){ drawPins(); if(S.loaded.props && !MAP.busy && mapList().some(p=>!GEO["L:"+p.id])) geocodeAll(); } }); }
 render();
 
 // ---------- data wiring ----------
