@@ -618,6 +618,43 @@ function addLoc(name){
   if(S.editLocs.length>=25) return toast("Up to 25 localities");
   S.editLocs.push(name); S.prefsDirty=true; renderLocList();
 }
+function parseCoords(t){
+  t=String(t||"");
+  let m=t.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) || t.match(/@(-?\d+\.\d+),\s*(-?\d+\.\d+)/) || t.match(/[?&](?:q|query|ll|destination)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/) || t.match(/^\s*\(?\s*(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{2,3}\.\d{3,})\s*\)?\s*$/);
+  if(!m) return null; const lat=+m[1], lon=+m[2];
+  if(!(lat>12.6&&lat<13.4&&lon>77.2&&lon<78.0)) return null; return {lat,lon};
+}
+async function setOfficeLocation(id, ll, label){
+  const base=(S.prefs&&Array.isArray(S.prefs.workplaces)&&S.prefs.workplaces.length)? S.prefs.workplaces.map(o=>({...o})) : DEFAULT_OFFICES.map(o=>({...o}));
+  const o=base.find(x=>x.id===id); if(!o) return;
+  o.lat=+ll.lat.toFixed(6); o.lon=+ll.lon.toFixed(6); o.approx=false; delete o.geo;
+  const data={...S.prefs, workplaces:base};
+  const {error}=await S.sb.from("prefs").update({data, updated_at:new Date().toISOString()}).eq("id",1);
+  if(error) return toast("Couldn't save the office location");
+  S.prefs=data; const loc=localOffices(); delete loc[id]; try{ localStorage.setItem(OFFICE_KEY, JSON.stringify(loc)); }catch{}
+  toast(`${o.short||o.name} set${label?" to "+label:""}`);
+  if(MAP.map){ placeOffice(); drawPins(); } roadAll(); render();
+}
+function wireOfficeSearch(inp){
+  const id=inp.dataset.office, box=document.querySelector(`[data-osugg="${id}"]`);
+  let items=[], timer=null, seq=0;
+  const close=()=>box.classList.remove("on");
+  const show=()=>{ if(!items.length) return close();
+    box.innerHTML=items.map((it,i)=>`<button type="button" data-i="${i}">${esc(it.name)}${it.sub?`<small>${esc(it.sub)}</small>`:""}</button>`).join(""); box.classList.add("on");
+    box.querySelectorAll("button").forEach(b=>b.onmousedown=e=>{ e.preventDefault(); const it=items[+b.dataset.i]; close(); inp.value=""; setOfficeLocation(id,it,it.name); }); };
+  inp.oninput=()=>{ const q=inp.value.trim(); const c=parseCoords(q);
+    if(c){ items=[{...c,name:`Use ${c.lat.toFixed(5)}, ${c.lon.toFixed(5)}`,sub:"Coordinates you pasted"}]; return show(); }
+    if(q.length<3){ items=[]; return close(); }
+    clearTimeout(timer); const my=++seq;
+    timer=setTimeout(async()=>{ try{
+      const r=await fetch("https://photon.komoot.io/api/?limit=8&lang=en&lat=12.96&lon=77.68&bbox=77.35,12.75,77.90,13.20&q="+encodeURIComponent(q)); const j=await r.json(); if(my!==seq) return;
+      items=(j.features||[]).map(f=>{ const p=f.properties||{}; return {lat:f.geometry.coordinates[1],lon:f.geometry.coordinates[0],name:p.name||p.street||q,
+        sub:[p.street&&p.name!==p.street?p.street:null,p.district||p.locality,p.city].filter(Boolean).join(", ")}; });
+      show(); }catch{} }, 300);
+  };
+  inp.onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); const c=parseCoords(inp.value); if(c){ close(); inp.value=""; setOfficeLocation(id,c); } else if(items[0]){ const it=items[0]; close(); inp.value=""; setOfficeLocation(id,it,it.name); } } else if(e.key==="Escape") close(); };
+  inp.onblur=()=>setTimeout(close,150);
+}
 function wireLocSearch(){
   const inp=$("#locSearch"), box=$("#locSugg"); if(!inp) return;
   let items=[], hl=-1, timer=null, seq=0;
@@ -689,8 +726,12 @@ function renderPrefs(){
   </div>
   <div class="panel small">
     <b>Offices</b>
-    ${offices().map(o=>`<p style="margin:6px 0">${esc(o.name)}${o.address?`<br><span class="muted">${esc(o.address)}</span>`:""}</p>`).join("")}
-    <p class="muted" style="margin:4px 0 10px">Distances to all offices are shown on each listing and on the Map. Move an office pin on the Map if it's in the wrong spot.</p>
+    ${offices().map(o=>`<div style="margin:8px 0 12px"><div><b style="font-weight:650">${esc(o.name)}</b>${o.approx?` <span class="tag warn">location approximate</span>`:` <span class="tag ok">location set</span>`}</div>
+      ${o.address?`<div class="muted">${esc(o.address)}</div>`:""}
+      <div class="muted">Pin: ${o.lat.toFixed(5)}, ${o.lon.toFixed(5)} · <a href="https://www.google.com/maps/search/?api=1&query=${o.lat},${o.lon}" target="_blank" rel="noopener">check in Google Maps</a></div>
+      ${S.canWrite?`<div class="locwrap" style="margin-top:6px"><input data-office="${esc(o.id)}" placeholder="Search the building, or paste coordinates / a Google Maps link" autocomplete="off"><div class="sugg" data-osugg="${esc(o.id)}"></div></div>`:""}
+    </div>`).join("")}
+    <p class="muted" style="margin:4px 0 10px">To set an office exactly: in Google Maps, press and hold on the building, copy the numbers shown (like 12.97, 77.69) and paste them above. You can also drag an office pin on the Map. Distances on every listing update automatically.</p>
     <b>Commute estimates by locality</b>
     <p class="muted" style="margin:4px 0 8px">Rough driving-time ranges from the locality to EY Coral at office hours. They are locality-level estimates, not routed per address, and use no live traffic. Treat them as a guide and check with a maps app before deciding.</p>
     <table class="rep">${commuteRows}</table>
@@ -706,8 +747,9 @@ function renderPrefs(){
     <div class="actions"><button id="lockBtn">Lock this device</button></div>
   </div>`}`;
   S.editLocs=[...(pr.localities||[])]; renderLocList(); wireLocSearch();
+  el.querySelectorAll("[data-office]").forEach(wireOfficeSearch);
   el.querySelectorAll(".opt input").forEach(i=>i.onchange=()=>{ i.closest(".opt").classList.toggle("on",i.checked); S.prefsDirty=true; });
-  el.oninput=()=>{ S.prefsDirty=true; };
+  el.oninput=e=>{ if(e.target.closest("[data-office]")) return; S.prefsDirty=true; };
   const sp=$("#savePrefs"); if(sp) sp.onclick=savePrefs;
   const sn=$("#saveName"); if(sn) sn.onclick=()=>{ const n=$("#myName").value.trim().slice(0,40)||"Guest"; S.email=n; ls.set("fmh_name",n); toast("Name saved"); render(); };
   const ub=$("#unlockBtn"); if(ub) ub.onclick=showCode;
@@ -820,7 +862,7 @@ const GEO_KEY="fmh_geo_v1", OFFICE_KEY="fmh_offices_v1";
 const DEFAULT_OFFICES=[
   {id:"ey",short:"EY Coral",name:"EY GDS — Coral, Bagmane WTC",lat:12.9791,lon:77.6967,approx:true,geo:"Bagmane World Technology Center, Mahadevapura"},
   {id:"rmz",short:"RMZ Infinity",name:"RMZ Infinity",lat:12.9925,lon:77.6609,approx:true,geo:"RMZ Infinity, Old Madras Road"},
-  {id:"refyne",short:"Refyne",name:"Refyne India",lat:12.9145,lon:77.6825,approx:true,geo:"Ambalipura, Bengaluru"}];
+  {id:"refyne",short:"Refyne",name:"Refyne India",lat:12.9145,lon:77.6825,approx:true}];
 const GEO=(()=>{ try{ return JSON.parse(localStorage.getItem(GEO_KEY)||"{}")||{}; }catch{ return {}; } })();
 function geoSave(){ try{ localStorage.setItem(GEO_KEY, JSON.stringify(GEO)); }catch{} }
 function localOffices(){ try{ return JSON.parse(localStorage.getItem(OFFICE_KEY)||"{}")||{}; }catch{ return {}; } }
@@ -1012,11 +1054,6 @@ window.mapShow=function(){
     $("#mapSaveOffice").onclick=saveOffice;
     wireMapFilters();
   } else { MAP.map.invalidateSize(); placeOffice(); }
-  if(!MAP.triedOffice){ MAP.triedOffice=true; const loc=localOffices();
-    offices().filter(o=>o.approx && o.geo && !loc[o.id]).forEach((o,i)=>setTimeout(()=>photon(o.geo).then(res=>{
-      const g=res.find(x=>kmBetween(o,x)<2.5); if(!g) return; const l2=localOffices(); if(l2[o.id]) return;
-      MAP.refined=MAP.refined||{}; MAP.refined[o.id]={lat:g.lat,lon:g.lon}; const m=MAP.offices&&MAP.offices[o.id]; if(m) m.setLatLng([g.lat,g.lon]);
-      const base=(S.prefs&&S.prefs.workplaces)||[]; const t=base.find(x=>x.id===o.id); if(t){ t.lat=g.lat; t.lon=g.lon; } if(MAP.sel) selectPin(MAP.sel); render(); }).catch(()=>{}), i*400)); }
   drawPins();
   if(!MAP.fitted && mapList().some(p=>GEO["L:"+p.id])){ fitAll(); MAP.fitted=true; }
   if(S.loaded.props) geocodeAll(); else $("#mapStatus").textContent="Loading listings…";
