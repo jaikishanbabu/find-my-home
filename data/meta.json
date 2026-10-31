@@ -1,0 +1,56 @@
+{
+ "status": {
+  "lastRunAt": "2026-10-31T18:16:04Z",
+  "lastSuccessAt": "2026-10-31T18:16:04Z",
+  "lastStatus": "success",
+  "lastSuccessRunId": "run-20261031",
+  "lastError": null,
+  "nextRunAt": "2026-11-01T02:20:00Z",
+  "schedule": "Daily 7:50 AM IST",
+  "sources": [
+   "NoBroker"
+  ]
+ },
+ "runs": [
+  {
+   "id": "run-20261031",
+   "startedAt": "2026-10-31T18:14:35Z",
+   "finishedAt": "2026-10-31T18:16:04Z",
+   "status": "success",
+   "found": 58,
+   "newCount": 20,
+   "matchCount": 21,
+   "sources": [
+    "NoBroker (locality pages)"
+   ],
+   "report": {
+    "summary": "Test run straight after setup. It searched all 6 localities, including Doddanekundi, which failed earlier, and added 20 new listings, for 60 tracked in total. 21 listings are full matches. Best current picks: Srikar Residency in Kaggadasapura (₹31k, west-facing, lift, ₹62k deposit), Muraleeravam in Mahadevapura (₹35k, east-facing, gated, lift), Parimala Winsome in Marathahalli (₹30k, west-facing, lift), an east-facing AECS Layout house in Marathahalli (₹32k, car parking) and new Sangam Paradise in Doddanekundi (₹30k, lift).",
+    "top": [
+     "nobroker-8a9fb3827ecfc74f017ed01cf9ba1a73",
+     "nobroker-8a9f9f8477628a1a0177629841c604cc",
+     "nobroker-8a9fc1827f63d618017f63e363120574",
+     "nobroker-8aa9b206a081701701a0843ecd6623b1",
+     "nobroker-8a9f8b8497db1d350197db8db24e28e2"
+    ],
+    "needsConfirmation": "actual availability, water supply and exact commute."
+   }
+  },
+  {
+   "id": "run-20261031-initial",
+   "startedAt": "2026-10-31T17:58:00Z",
+   "finishedAt": "2026-10-31T18:05:00Z",
+   "status": "success",
+   "found": 40,
+   "newCount": 40,
+   "matchCount": 24,
+   "sources": [
+    "NoBroker (locality pages + listing pages)"
+   ],
+   "report": {
+    "summary": "First search: 40 owner-listed 2 BHKs saved from 5 localities.",
+    "top": [],
+    "needsConfirmation": "actual availability, water supply, balcony and exact commute."
+   }
+  }
+ ]
+}

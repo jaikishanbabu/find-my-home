@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Find My Home</title>
+<meta name="robots" content="noindex,nofollow">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<style>
+:root{--ink:#18332d;--muted:#6b7d77;--bg:#f4f7f4;--card:#fff;--line:#e2e9e4;--brand:#176b52;--brand-ink:#fff;--brand-soft:#e5f3eb;--gold:#f2d48b;
+  --warn:#654b14;--warn-soft:#fff5dc;--bad:#9b2c22;--new:#1f4fb8;--new-soft:#e7eefc;--fav:#b4530f;--r:17px;--bad-soft:#fdece9}
+
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;-webkit-text-size-adjust:100%}
+header{background:linear-gradient(135deg,#123c32,#23745a);color:#fff;padding:calc(env(safe-area-inset-top) + 18px) 18px 12px;border-radius:0 0 24px 24px;box-shadow:0 6px 20px #12302a22}
+.brand{font-weight:800;font-size:23px;letter-spacing:-.5px}.brand span{color:var(--gold)}
+header .sub{font-size:13px;opacity:.86;margin-top:4px}
+nav{display:flex;gap:6px;overflow-x:auto;padding:12px 0 2px;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav a{flex:0 0 auto;text-decoration:none;color:#fff;padding:7px 12px;border-radius:999px;border:1px solid #ffffff40;font-size:13px;font-weight:650;background:#ffffff14}
+nav a.on{background:#fff;color:var(--brand);border-color:#fff}
+main{padding:16px 16px calc(env(safe-area-inset-bottom) + 30px);max-width:850px;margin:0 auto}
+.view{display:none}.view.on{display:block}
+h2{font-size:17px;margin:20px 2px 12px}
+h2:first-child{margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 12px}
+.stat b{display:block;font-size:20px;font-weight:800;color:var(--brand)}
+.stat span{color:var(--muted);font-size:11.5px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;margin-bottom:12px}
+.panel div{margin:2px 0}
+.muted{color:var(--muted)}.small{font-size:12.5px}
+.banner{border-radius:13px;padding:12px 13px;margin-bottom:14px;font-size:12.5px;line-height:1.45;border:1px solid transparent}
+.banner.warn{background:var(--warn-soft);border-color:#f2dca4;color:var(--warn)}
+.banner.bad{background:var(--bad-soft);border-color:#f3c9c2;color:var(--bad)}
+.banner.ok{background:var(--brand-soft);border-color:#d4e6dc;color:var(--brand)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin:12px 0;box-shadow:0 4px 15px #1a3c2c0d}
+.card.rejected{opacity:.55}
+.photo{height:84px;background:linear-gradient(135deg,#d9e9dc,#a5c9b4);display:flex;align-items:center;justify-content:space-between;padding:0 16px;color:#123c32}
+.photo .ico{font-size:34px}
+.photo .ph{font-size:11px;font-weight:650;background:#ffffffb0;border-radius:100px;padding:5px 9px}
+.content{padding:14px}
+.card .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.card h3{margin:0 0 2px;font-size:16px;font-weight:800;line-height:1.3}
+.rent{font-weight:800;font-size:18px;white-space:nowrap;text-align:right;color:var(--brand)}
+.rent small{display:block;font-weight:500;font-size:11.5px;color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.tag{font-size:11px;font-weight:650;padding:5px 8px;border-radius:7px;background:#f1f5f1;color:#435b50}
+.tag.new{background:var(--new-soft);color:var(--new)}
+.tag.fav{background:#fdebd9;color:var(--fav)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tag.bad{background:var(--bad-soft);color:var(--bad)}
+.tag.ok{background:var(--brand-soft);color:var(--brand)}
+dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:8px 0 0;font-size:13px}
+dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}
+.ns{color:#9aa9a3;font-style:italic}
+details.more summary{cursor:pointer;color:var(--brand);font-size:13px;margin-top:10px;font-weight:650}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}
+button,.btn{font:inherit;font-size:12.5px;font-weight:700;border:1px solid #d4e6dc;background:#eaf3ee;color:var(--brand);border-radius:11px;padding:9px 11px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:40px}
+button.primary,.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.actions .btn.primary{flex:1 1 100%}
+button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+button:disabled{opacity:.5}
+textarea,input,select{font:inherit;font-size:16px;width:100%;padding:11px 10px;border:1px solid #d8e2dc;border-radius:10px;background:#fff;color:var(--ink)}
+textarea{min-height:80px}
+label.f{display:block;font-size:12px;font-weight:650;color:#496159;margin:12px 0 5px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:13px;background:#fff}
+.chip input{width:auto;margin:0;accent-color:var(--brand)}
+.filterbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.filterbar select{flex:1}
+.sheet{display:none;position:fixed;inset:0;z-index:20;background:rgba(10,30,24,.45)}
+.sheet.on{display:block}
+.sheet .inner{position:absolute;left:0;right:0;bottom:0;max-height:88vh;overflow:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom) + 20px);max-width:850px;margin:0 auto}
+.sheet h3{margin:0 0 6px;font-weight:800}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%);background:#123c32;color:#fff;padding:10px 15px;border-radius:12px;font-size:13.5px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;max-width:90vw}
+.toast.on{opacity:1}
+.empty{text-align:center;color:var(--muted);padding:25px 12px;background:#fff;border-radius:14px;border:1px solid var(--line)}
+.score{font-size:11px;color:var(--muted);margin-top:8px}
+table.rep{width:100%;border-collapse:collapse;font-size:13px}
+table.rep td{padding:6px 4px;border-top:1px solid var(--line);vertical-align:top}
+.sharebox{white-space:pre-wrap;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;max-height:40vh;overflow:auto}
+.votes{display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.votes button{min-height:34px;padding:6px 10px}
+.cmts{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.cmt{font-size:13px;margin:6px 0}.cmt b{font-weight:700}.cmt span{color:var(--muted);font-size:11px}
+.cmtform{display:flex;gap:6px;margin-top:6px}.cmtform input{flex:1;padding:8px 10px;font-size:16px}
+.who{font-size:11.5px;color:var(--muted)}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
+@media(min-width:600px){.stats{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">⌂ Find My <span>Home</span></div>
+  <div class="sub" id="hdrSub">Your Bengaluru rental search, organised in one place.</div>
+  <nav id="nav">
+    <a href="#home" data-v="home">Dashboard</a>
+    <a href="#listings" data-v="listings">Listings</a>
+    <a href="#shortlist" data-v="shortlist">Shortlist</a>
+    <a href="#report" data-v="report">Daily report</a>
+    <a href="#settings" data-v="settings">Preferences</a>
+  </nav>
+</header>
+<main>
+  <div id="globalMsg"></div>
+  <section id="loginView" class="panel" style="display:none">
+    <h2 style="margin-top:0">Sign in</h2>
+    <p class="small muted">Enter your email and we'll send you a sign-in link. Only people the owner has invited can see the dashboard.</p>
+    <form id="loginForm"><label class="f" for="loginEmail">Email</label>
+      <input id="loginEmail" type="email" autocomplete="email" required placeholder="you@example.com">
+      <div class="actions"><button class="primary" type="submit" id="loginBtn">Email me a sign-in link</button></div></form>
+    <p class="small muted" id="loginMsg"></p>
+  </section>
+  <section id="notMember" class="panel" style="display:none">
+    <h2 style="margin-top:0">Waiting for an invite</h2>
+    <p class="small">You're signed in as <b id="nmEmail"></b>, but this email hasn't been invited yet. Ask the owner to add it under Preferences → People.</p>
+    <div class="actions"><button id="nmSignOut">Sign out</button></div>
+  </section>
+
+  <section class="view" id="v-home">
+    <div class="stats">
+      <div class="stat"><b id="sNew">–</b><span>New in latest search</span></div>
+      <div class="stat"><b id="sMatch">–</b><span>Match all main criteria</span></div>
+      <div class="stat"><b id="sFav">–</b><span>On shortlist</span></div>
+      <div class="stat"><b id="sTotal">–</b><span>Active listings tracked</span></div>
+    </div>
+    <h2>Search status</h2>
+    <div class="panel small" id="statusPanel"><span class="muted">Loading…</span></div>
+    <h2>Best new matches</h2>
+    <div id="homeNew"></div>
+    <h2>Recently viewed</h2>
+    <div id="homeRecent"></div>
+  </section>
+
+  <section class="view" id="v-listings">
+    <div class="filterbar">
+      <select id="sortSel" aria-label="Sort">
+        <option value="score">Best match first</option>
+        <option value="new">Newest first</option>
+        <option value="rentAsc">Rent: low to high</option>
+        <option value="commute">Shortest commute</option>
+      </select>
+      <button id="openFilters">Filters <span id="fCount"></span></button>
+    </div>
+    <div class="small muted" id="listCount" style="margin:0 2px 10px"></div>
+    <div id="list"></div>
+  </section>
+
+  <section class="view" id="v-shortlist">
+    <div class="banner ok small">The shortlist is shared with anyone you give access to this page. Your notes and contacted/rejected marks stay private to you.</div>
+    <div id="favList"></div>
+  </section>
+
+  <section class="view" id="v-report">
+    <div id="reportBody"></div>
+    <h2>Search history</h2>
+    <div id="runList"></div>
+  </section>
+
+  <section class="view" id="v-settings">
+    <div id="prefsForm"></div>
+  </section>
+  <footer>Find My Home · Private dashboard<br>Before paying a deposit, verify availability, ownership, rent, deposit, brokerage and commute directly.</footer>
+</main>
+
+<div class="sheet" id="filterSheet"><div class="inner">
+  <h3>Filters</h3>
+  <div id="filterForm"></div>
+  <div class="actions"><button class="primary" id="applyFilters">Show results</button><button id="resetFilters">Reset</button></div>
+</div></div>
+
+<div class="sheet" id="shareSheet"><div class="inner">
+  <h3>Share this property</h3>
+  <p class="small muted">Shares a summary and the original listing link only. No notes or dashboard access.</p>
+  <div class="sharebox" id="shareText"></div>
+  <div class="actions">
+    <a class="btn primary" id="waLink" href="#" target="_blank" rel="noopener">WhatsApp</a>
+    <button id="copyShare">Copy text</button>
+    <button id="copyLink">Copy listing link</button>
+    <button id="closeShare">Close</button>
+  </div>
+</div></div>
+
+<div class="sheet" id="noteSheet"><div class="inner">
+  <h3>Private note</h3>
+  <p class="small muted" id="noteFor"></p>
+  <textarea id="noteText" maxlength="2000" placeholder="e.g. Called owner Sat, visit Sunday 11am"></textarea>
+  <div class="actions"><button class="primary" id="saveNote">Save note</button><button id="closeNote">Cancel</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+"use strict";
+const $ = s => document.querySelector(s);
+const NS = '<span class="ns">Not specified</span>';
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const val = v => (v === null || v === undefined || v === "" ) ? NS : esc(v);
+const yn = v => v === true ? "Yes" : v === false ? "No" : null;
+const inr = n => (typeof n === "number" && isFinite(n)) ? "₹" + n.toLocaleString("en-IN") : null;
+const fmtDT = s => { if(!s) return null; const d = new Date(s); if (isNaN(d)) return null;
+  return d.toLocaleString("en-IN",{timeZone:"Asia/Kolkata",day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}); };
+const fmtD = s => { if(!s) return null; const d = new Date(s); if (isNaN(d)) return null;
+  return d.toLocaleDateString("en-IN",{timeZone:"Asia/Kolkata",day:"numeric",month:"short",year:"numeric"}); };
+const norm = s => String(s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+const lsGet = (k,d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
+const lsSet = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+let toastT;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("on"),2200); }
+
+// ---------- state ----------
+const S = { sb:null, session:null, email:null, uid:null, member:false, canWrite:false, isOwner:false, comments:{}, votes:{}, members:[],
+  props:[], prefs:null, status:null, runs:[], shortlist:{}, marks:{},
+  loaded:{props:false,prefs:false}, filters: lsGet("fmh.filters", {}), sort: lsGet("fmh.sort","score") };
+
+// ---------- routing ----------
+const VIEWS = ["home","listings","shortlist","report","settings"];
+function route(){
+  const h = location.hash.replace("#","");
+  const v = VIEWS.includes(h) ? h : "home";
+  VIEWS.forEach(x => $("#v-"+x).classList.toggle("on", x===v));
+  document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("on", a.dataset.v===v));
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange", route); route();
+
+// ---------- domain logic ----------
+function prefsOrDefault(){ return S.prefs || { localities:[], minRent:0, maxRent:0, maxCommute:30, facing:[], commute:{} }; }
+function commuteFor(p){
+  if (p.commute && typeof p.commute.maxMin === "number") return p.commute;
+  const table = prefsOrDefault().commute || {};
+  const key = Object.keys(table).find(k => norm(k) === norm(p.locality));
+  return key ? { ...table[key], basis: "locality estimate" } : null;
+}
+function commuteText(c){
+  if (!c) return null;
+  const km = c.km ? ` (~${c.km} km)` : "";
+  return `${c.minMin}–${c.maxMin} min by car${km} · rough estimate, no live traffic`;
+}
+function isNew(p){ return S.status && S.status.lastSuccessRunId && p.firstSeenRun === S.status.lastSuccessRunId; }
+function availInfo(p){
+  const m = S.marks[p.id] || {};
+  if (p.status === "gone") return {t:"No longer listed", c:"bad"};
+  if (m.confirmed) return {t:"Confirmed available (by you)", c:"ok"};
+  if (p.availability === "verified") return {t:"Verified available", c:"ok"};
+  return {t:"Availability unconfirmed", c:"warn"};
+}
+function evaluate(p){
+  const pr = prefsOrDefault(); const notes=[]; let score=0; let majorOk=true;
+  const total = (p.rent||0);
+  if (typeof p.rent === "number"){
+    if (pr.maxRent && p.rent > pr.maxRent){ majorOk=false; notes.push("over budget"); score-=30; }
+    else if (pr.minRent && p.rent < pr.minRent){ notes.push("below min rent"); score-=5; }
+    else score+=20;
+    if (pr.maxRent && p.maintenance && p.rent + p.maintenance > pr.maxRent) notes.push("rent + maintenance over budget");
+  } else { majorOk=false; notes.push("rent unknown"); }
+  if (p.bhk && p.bhk !== 2){ majorOk=false; score-=40; }
+  const locs=(pr.localities||[]).map(norm);
+  if (locs.includes(norm(p.locality))) score+=15; else { notes.push("outside preferred areas"); }
+  const c = commuteFor(p);
+  if (c){ if (c.maxMin <= pr.maxCommute) score+=15; else if (c.minMin <= pr.maxCommute){ score+=5; majorOk=false; notes.push("commute borderline (may exceed target at peak)"); } else { majorOk=false; score-=15; notes.push("commute likely over target"); } }
+  else { majorOk=false; notes.push("commute unknown"); }
+  const fac = (p.facing||"").toLowerCase();
+  if (fac && (pr.facing||[]).some(f => fac.includes(f.toLowerCase()))) score+=8;
+  if (p.gated===true) score+=6; if (p.lift===true) score+=4; if (p.parking && /car|covered/i.test(p.parking)) score+=4;
+  if (p.balcony===true || (typeof p.balcony==="number" && p.balcony>0)) score+=3;
+  if (p.brokerage===0 || /^none|no brokerage|zero/i.test(String(p.brokerageText||""))) score+=5;
+  if (typeof p.deposit==="number" && typeof p.rent==="number"){ const mo=p.deposit/p.rent; if (mo<=4) score+=4; else if (mo>=8) score-=3; }
+  if (p.status==="gone"){ score-=50; }
+  if (p.dupOf) score-=10;
+  return { score, majorOk: majorOk && p.status!=="gone", notes, commute:c };
+}
+
+// ---------- filters ----------
+function applyFilters(list){
+  const f=S.filters;
+  return list.filter(p=>{
+    const m=S.marks[p.id]||{};
+    if (!f.showRejected && m.rejected) return false;
+    if (!f.showGone && p.status==="gone") return false;
+    if (f.locality && norm(p.locality)!==norm(f.locality)) return false;
+    if (f.minRent && !(p.rent>=f.minRent)) return false;
+    if (f.maxRent && !(p.rent<=f.maxRent)) return false;
+    if (f.maxCommute){ const c=commuteFor(p); if(!c || c.maxMin>f.maxCommute) return false; }
+    if (f.facing && !(p.facing||"").toLowerCase().includes(f.facing)) return false;
+    if (f.furnishing && norm(p.furnishing)!==norm(f.furnishing)) return false;
+    if (f.gated && p.gated!==true) return false;
+    if (f.lift && p.lift!==true) return false;
+    if (f.parking && !(p.parking && /car|covered/i.test(p.parking))) return false;
+    if (f.balcony && !(p.balcony===true || p.balcony>0)) return false;
+    if (f.noBrokerage && !(p.brokerage===0)) return false;
+    if (f.maxDeposit && !(p.deposit<=f.maxDeposit)) return false;
+    if (f.avail==="unconfirmed" && availInfo(p).c!=="warn") return false;
+    if (f.avail==="confirmed" && availInfo(p).c!=="ok") return false;
+    if (f.onlyNew && !isNew(p)) return false;
+    if (f.onlyMatch && !evaluate(p).majorOk) return false;
+    return true;
+  });
+}
+function sorted(list){
+  const by = S.sort;
+  const arr = list.map(p=>({p,e:evaluate(p)}));
+  arr.sort((a,b)=>{
+    if (by==="new") return String(b.p.firstSeen||"").localeCompare(String(a.p.firstSeen||""));
+    if (by==="rentAsc") return (a.p.rent??1e9)-(b.p.rent??1e9);
+    if (by==="commute") return ((a.e.commute?.maxMin)??999)-((b.e.commute?.maxMin)??999);
+    return b.e.score-a.e.score;
+  });
+  return arr;
+}
+function filterCount(){ return Object.entries(S.filters).filter(([k,v])=>v && v!=="").length; }
+
+function renderFilterForm(){
+  const f=S.filters; const locs=[...new Set(S.props.map(p=>p.locality).filter(Boolean))].sort();
+  const furn=[...new Set(S.props.map(p=>p.furnishing).filter(Boolean))].sort();
+  const chk=(k,l)=>`<label class="chip"><input type="checkbox" data-f="${k}" ${f[k]?"checked":""}> ${l}</label>`;
+  $("#filterForm").innerHTML = `
+    <label class="f">Locality</label>
+    <select data-f="locality"><option value="">Any</option>${locs.map(l=>`<option ${f.locality===l?"selected":""}>${esc(l)}</option>`).join("")}</select>
+    <div class="row"><div><label class="f">Min rent (₹)</label><input inputmode="numeric" data-f="minRent" value="${f.minRent||""}"></div>
+    <div><label class="f">Max rent (₹)</label><input inputmode="numeric" data-f="maxRent" value="${f.maxRent||""}"></div></div>
+    <div class="row"><div><label class="f">Max commute (min)</label><input inputmode="numeric" data-f="maxCommute" value="${f.maxCommute||""}"></div>
+    <div><label class="f">Max deposit (₹)</label><input inputmode="numeric" data-f="maxDeposit" value="${f.maxDeposit||""}"></div></div>
+    <div class="row"><div><label class="f">Facing</label><select data-f="facing"><option value="">Any</option>${["east","west","north","south"].map(x=>`<option value="${x}" ${f.facing===x?"selected":""}>${x[0].toUpperCase()+x.slice(1)}</option>`).join("")}</select></div>
+    <div><label class="f">Furnishing</label><select data-f="furnishing"><option value="">Any</option>${furn.map(x=>`<option ${f.furnishing===x?"selected":""}>${esc(x)}</option>`).join("")}</select></div></div>
+    <label class="f">Availability</label>
+    <select data-f="avail"><option value="">Any</option><option value="unconfirmed" ${f.avail==="unconfirmed"?"selected":""}>Unconfirmed only</option><option value="confirmed" ${f.avail==="confirmed"?"selected":""}>Confirmed only</option></select>
+    <label class="f">Must have</label>
+    <div class="chips">${chk("gated","Gated community")}${chk("lift","Lift")}${chk("parking","Car parking")}${chk("balcony","Balcony")}${chk("noBrokerage","No brokerage")}</div>
+    <label class="f">Show</label>
+    <div class="chips">${chk("onlyMatch","Only full matches")}${chk("onlyNew","Only new")}${chk("showRejected","Include rejected")}${chk("showGone","Include no-longer-listed")}</div>`;
+}
+function readFilterForm(){
+  const f={};
+  document.querySelectorAll("#filterForm [data-f]").forEach(el=>{
+    const k=el.dataset.f;
+    if (el.type==="checkbox"){ if(el.checked) f[k]=true; }
+    else if (el.inputMode==="numeric"){ const n=parseInt(String(el.value).replace(/[^0-9]/g,""),10); if(n>0) f[k]=n; }
+    else if (el.value) f[k]=el.value;
+  });
+  return f;
+}
+$("#openFilters").onclick=()=>{ renderFilterForm(); $("#filterSheet").classList.add("on"); };
+$("#applyFilters").onclick=()=>{ S.filters=readFilterForm(); lsSet("fmh.filters",S.filters); $("#filterSheet").classList.remove("on"); render(); };
+$("#resetFilters").onclick=()=>{ S.filters={}; lsSet("fmh.filters",{}); renderFilterForm(); };
+$("#filterSheet").onclick=e=>{ if(e.target.id==="filterSheet") e.currentTarget.classList.remove("on"); };
+$("#sortSel").value=S.sort;
+$("#sortSel").onchange=e=>{ S.sort=e.target.value; lsSet("fmh.sort",S.sort); render(); };
+
+// ---------- cards ----------
+function cardHTML(p, e){
+  const m=S.marks[p.id]||{}; const fav=!!S.shortlist[p.id]; const av=availInfo(p);
+  const tags=[];
+  if (isNew(p)) tags.push(`<span class="tag new">New</span>`);
+  if (fav) tags.push(`<span class="tag fav">★ Shortlisted${S.shortlist[p.id].added_by_email?" by "+esc(nameOf(S.shortlist[p.id].added_by_email)):""}</span>`);
+  tags.push(`<span class="tag ${av.c}">${av.t}</span>`);
+  if (p.dupOf) tags.push(`<span class="tag warn">Possible duplicate</span>`);
+  if (e.majorOk) tags.push(`<span class="tag ok">Matches main criteria</span>`);
+  if (m.contacted) tags.push(`<span class="tag">Contacted</span>`);
+  if (m.rejected) tags.push(`<span class="tag bad">Rejected</span>`);
+  const rentTxt = inr(p.rent) || "Rent not specified";
+  const maint = p.maintenance ? `+ ${inr(p.maintenance)} maint.` : (p.maintenance===0 ? "No extra maintenance" : "");
+  const wr = S.canWrite;
+  const rows = [
+    ["Locality", p.locality],["Address", p.address],["Building / society", p.society],
+    ["Bedrooms / baths", (p.bhk?p.bhk+" BHK":"") + (p.baths? " · "+p.baths+" bath":"") || null],
+    ["Built-up area", p.areaSqft ? p.areaSqft.toLocaleString("en-IN")+" sq ft"+(p.areaType?" ("+p.areaType+")":"") : null],
+    ["Facing", p.facing],["Furnishing", p.furnishing],
+    ["Security deposit", inr(p.deposit)],["Brokerage", p.brokerageText || (p.brokerage===0?"None":null)],
+    ["Commute to EY Coral", commuteText(e.commute)],
+  ];
+  const more = [
+    ["Property type", p.propertyType],["Gated community", yn(p.gated)],["Lift", yn(p.lift)],["Parking", p.parking],
+    ["Water supply", p.water],["Security", p.security],["Balcony", typeof p.balcony==="number"? String(p.balcony): yn(p.balcony)],
+    ["Floor", p.floor],["Power backup", p.power],["Other amenities", Array.isArray(p.amenities)? p.amenities.join(", ") : null],
+    ["Preferred tenants", p.tenants],["Check note", p.checkNote],["Available from", p.availableFrom],["Source", p.source],
+    ["First discovered", fmtD(p.firstSeen)],["Last checked", fmtDT(p.lastChecked)],
+    ["Match notes", e.notes.length? e.notes.join(", ") : "—"],
+  ];
+  const dl = r => r.map(([k,v])=>`<dt>${k}</dt><dd>${val(v)}</dd>`).join("");
+  return `<article class="card ${m.rejected?"rejected":""}" data-id="${esc(p.id)}">
+    <div class="photo"><span class="ico">🏠</span><span class="ph">Photos on ${esc(p.source||"source site")}</span></div>
+    <div class="content">
+    <div class="top"><div><h3>${esc(p.title||"Untitled listing")}</h3><div class="small muted">${esc(p.locality||"")}${p.source?" · "+esc(p.source):""}</div></div>
+    <div class="rent">${esc(rentTxt)}<small>${esc(maint)}</small></div></div>
+    <div class="tags">${tags.join("")}</div>
+    <dl>${dl(rows)}</dl>
+    <details class="more"><summary>More details</summary><dl>${dl(more)}</dl>
+      ${p.dupOf?`<p class="small muted">Looks similar to another listing (${esc(p.dupReason||"same building, rent and size")}). Not merged automatically, so check both.</p>`:""}
+      ${m.notes?`<p class="small"><b>Your note:</b> ${esc(m.notes)}</p>`:""}
+    </details>
+    <div class="actions">
+      <a class="btn primary" href="${esc(p.url)}" target="_blank" rel="noopener" data-act="open">Open listing ↗</a>
+      ${wr?`<button data-act="fav" class="${fav?"on":""}">${fav?"★ Shortlisted":"☆ Shortlist"}</button>`:""}
+      <button data-act="share">Share</button>
+      ${S.uid?`<button data-act="contacted" class="${m.contacted?"on":""}">${m.contacted?"✓ Contacted":"Mark contacted"}</button>
+      <button data-act="confirmed" class="${m.confirmed?"on":""}">${m.confirmed?"✓ Available":"Confirm available"}</button>
+      <button data-act="rejected" class="${m.rejected?"on":""}">${m.rejected?"Rejected":"Reject"}</button>
+      <button data-act="note">${m.notes?"Edit note":"Add note"}</button>`:""}
+    </div>
+    ${S.member?votesHTML(p):""}
+    ${S.member?commentsHTML(p):""}
+    <div class="score">Match score ${e.score}</div>
+    </div>
+  </article>`;
+}
+document.addEventListener("click", async ev=>{
+  const b = ev.target.closest("[data-act]"); if(!b) return;
+  const card=b.closest("[data-id]"); const id=card?.dataset.id; const p=S.props.find(x=>x.id===id); if(!p) return;
+  const act=b.dataset.act;
+  if (act==="open"){ markViewed(p.id); return; }
+  if (act==="share") return openShare(p);
+  if (act==="note") return openNote(p);
+  if (act==="fav") return toggleFav(p);
+  if (act==="up") return vote(p,1);
+  if (act==="down") return vote(p,-1);
+  if (act==="delc"){ ev.preventDefault(); const {error}=await S.sb.from("comments").delete().eq("id",b.dataset.cid); if(error) toast("Couldn't delete"); return loadComments(); }
+  if (["contacted","rejected","confirmed"].includes(act)){ const m=S.marks[p.id]||{}; return saveMark(p.id,{[act]:!m[act]}); }
+});
+
+// ---------- people, votes, comments ----------
+function nameOf(email){ if(!email) return "Someone"; if(email===S.email) return "you"; return email.split("@")[0]; }
+function votesHTML(p){
+  const vs=S.votes[p.id]||[]; const up=vs.filter(v=>v.value===1), dn=vs.filter(v=>v.value===-1);
+  const mine=(vs.find(v=>v.user_id===S.uid)||{}).value;
+  const names=a=>a.map(v=>esc(nameOf(v.user_email))).join(", ");
+  return `<div class="votes"><button data-act="up" class="${mine===1?"on":""}">👍 ${up.length}</button><button data-act="down" class="${mine===-1?"on":""}">👎 ${dn.length}</button>
+    <span class="who">${up.length?"Likes: "+names(up):""}${up.length&&dn.length?" · ":""}${dn.length?"Not keen: "+names(dn):""}</span></div>`;
+}
+function commentsHTML(p){
+  const cs=S.comments[p.id]||[];
+  return `<div class="cmts">${cs.map(c=>`<div class="cmt"><b>${esc(nameOf(c.user_email))}</b> ${esc(c.body)} <span>${esc(fmtDT(c.created_at)||"")}</span>${c.user_id===S.uid?` <a href="#" data-act="delc" data-cid="${c.id}" class="small">delete</a>`:""}</div>`).join("")}
+    <form class="cmtform" data-pid="${esc(p.id)}"><input maxlength="1000" placeholder="Add a comment for everyone…" aria-label="Comment"><button type="submit">Post</button></form></div>`;
+}
+document.addEventListener("submit", async ev=>{
+  const f=ev.target.closest(".cmtform"); if(!f) return; ev.preventDefault();
+  const inp=f.querySelector("input"); const body=inp.value.trim(); if(!body) return;
+  inp.disabled=true;
+  const {error}=await S.sb.from("comments").insert({prop_id:f.dataset.pid, body});
+  inp.disabled=false;
+  if(error) return toast("Couldn't post comment");
+  inp.value=""; await loadComments();
+});
+async function vote(p,val){
+  const mine=((S.votes[p.id]||[]).find(v=>v.user_id===S.uid)||{}).value;
+  let error;
+  if(mine===val) ({error}=await S.sb.from("votes").delete().match({prop_id:p.id,user_id:S.uid}));
+  else ({error}=await S.sb.from("votes").upsert({prop_id:p.id,user_id:S.uid,value:val}));
+  if(error) return toast("Couldn't save vote"); await loadVotes();
+}
+
+// ---------- writes ----------
+async function toggleFav(p){
+  if(!S.member) return;
+  let error;
+  if (S.shortlist[p.id]) ({error}=await S.sb.from("shortlist").delete().eq("prop_id",p.id));
+  else ({error}=await S.sb.from("shortlist").insert({prop_id:p.id}));
+  if(error) return toast("Couldn't update shortlist");
+  toast(S.shortlist[p.id]?"Removed from shortlist":"Added to shortlist"); await loadShortlist();
+}
+const markQueue={};
+async function saveMark(id, patch){
+  if(!S.member||!S.uid) return;
+  const cur={...(S.marks[id]||{}), ...patch};
+  S.marks[id]=cur; render();
+  const row={user_id:S.uid,prop_id:id,contacted:!!cur.contacted,rejected:!!cur.rejected,confirmed:!!cur.confirmed,notes:cur.notes||null,viewed_at:cur.viewedAt||null,updated_at:new Date().toISOString()};
+  const prev=markQueue[id]||Promise.resolve();
+  markQueue[id]=prev.then(async()=>{ const {error}=await S.sb.from("marks").upsert(row); if(error) toast("Couldn't save. Try again."); });
+}
+function markViewed(id){ if(S.uid) saveMark(id,{viewedAt:new Date().toISOString()}); }
+
+// ---------- share ----------
+let shareP=null;
+function shareText(p){
+  const e=evaluate(p); const c=commuteText(e.commute);
+  const L=[`🏠 ${p.title||"2 BHK for rent"}`,
+    `Rent: ${inr(p.rent)||"Not specified"}${p.maintenance?` + ${inr(p.maintenance)} maintenance`:""}`,
+    `Area: ${[p.society,p.locality].filter(Boolean).join(", ")||"Not specified"}`,
+    `Deposit: ${inr(p.deposit)||"Not specified"}`,
+    `Furnishing: ${p.furnishing||"Not specified"} · Facing: ${p.facing||"Not specified"}`,
+    `Commute to EY Coral: ${c||"Not estimated"}`,
+    `Availability: ${availInfo(p).t}`,
+    `Listing: ${p.url}`];
+  return L.join("\n");
+}
+function openShare(p){
+  shareP=p; const t=shareText(p);
+  $("#shareText").textContent=t;
+  $("#waLink").href="https://wa.me/?text="+encodeURIComponent(t);
+  $("#shareSheet").classList.add("on");
+}
+async function copy(t){ try{ await navigator.clipboard.writeText(t); toast("Copied"); }catch{ toast("Copy blocked — press and hold the text to copy"); } }
+$("#copyShare").onclick=()=>copy($("#shareText").textContent);
+$("#copyLink").onclick=()=>shareP&&copy(shareP.url);
+$("#closeShare").onclick=()=>$("#shareSheet").classList.remove("on");
+$("#shareSheet").onclick=e=>{ if(e.target.id==="shareSheet") e.currentTarget.classList.remove("on"); };
+
+// ---------- notes ----------
+let noteP=null;
+function openNote(p){ noteP=p; $("#noteFor").textContent=p.title||""; $("#noteText").value=(S.marks[p.id]||{}).notes||""; $("#noteSheet").classList.add("on"); }
+$("#saveNote").onclick=()=>{ if(noteP){ saveMark(noteP.id,{notes:$("#noteText").value.slice(0,2000)}); toast("Note saved"); } $("#noteSheet").classList.remove("on"); };
+$("#closeNote").onclick=()=>$("#noteSheet").classList.remove("on");
+
+// ---------- preferences ----------
+function renderPrefs(){
+  const pr=S.prefs; const el=$("#prefsForm");
+  if(!S.loaded.prefs){ el.innerHTML=`<div class="empty">Loading preferences…</div>`; return; }
+  if(!pr){ el.innerHTML=`<div class="empty">No preferences saved yet.</div>`; return; }
+  const ro = !S.isOwner;
+  const facings=["East","West","North","South","North-East","North-West","South-East","South-West"];
+  const commuteRows=Object.entries(pr.commute||{}).map(([k,c])=>`<tr><td>${esc(k)}</td><td>${c.minMin}–${c.maxMin} min</td><td>${c.km?("~"+c.km+" km"):""}</td></tr>`).join("");
+  el.innerHTML=`
+  ${ro?`<div class="banner warn">View only. The owner manages preferences.</div>`:""}
+  <div class="panel">
+    <b>Search</b>
+    <label class="chip" style="margin-top:8px"><input type="checkbox" id="pEnabled" ${pr.searchEnabled?"checked":""} ${ro?"disabled":""}> Daily automatic search is ON</label>
+    <p class="small muted" style="margin:8px 0 0">Runs once a day at about ${esc(pr.scheduleLabel||"7:50 AM IST")} in the cloud. Turn off to pause; the next run will skip until you turn it back on.</p>
+    <label class="f">Property type</label><input id="pType" value="${esc(pr.propertyType||"2 BHK apartment")}" ${ro?"disabled":""}>
+    <div class="row"><div><label class="f">Min rent (₹)</label><input id="pMin" inputmode="numeric" value="${pr.minRent||""}" ${ro?"disabled":""}></div>
+    <div><label class="f">Max rent (₹)</label><input id="pMax" inputmode="numeric" value="${pr.maxRent||""}" ${ro?"disabled":""}></div></div>
+    <label class="f">Max commute target (minutes)</label><input id="pCommute" inputmode="numeric" value="${pr.maxCommute||""}" ${ro?"disabled":""}>
+    <label class="f">Preferred localities (one per line, in priority order)</label>
+    <textarea id="pLocs" ${ro?"disabled":""}>${esc((pr.localities||[]).join("\n"))}</textarea>
+    <label class="f">Preferred facing</label>
+    <div class="chips">${facings.map(f=>`<label class="chip"><input type="checkbox" data-facing="${f}" ${(pr.facing||[]).includes(f)?"checked":""} ${ro?"disabled":""}> ${f}</label>`).join("")}</div>
+    <label class="f">Furnishing accepted</label>
+    <div class="chips">${["Unfurnished","Semi furnished","Fully furnished"].map(f=>`<label class="chip"><input type="checkbox" data-furn="${f}" ${(pr.furnishing||[]).includes(f)?"checked":""} ${ro?"disabled":""}> ${f}</label>`).join("")}</div>
+    <label class="f">Amenities wanted</label>
+    <div class="chips">${["Gated community","Lift","Covered parking","Reliable water","Security","Balcony","No brokerage","Lower deposit"].map(f=>`<label class="chip"><input type="checkbox" data-amen="${f}" ${(pr.amenities||[]).includes(f)?"checked":""} ${ro?"disabled":""}> ${f}</label>`).join("")}</div>
+    ${ro?"":`<div class="actions"><button class="primary" id="savePrefs">Save preferences</button></div>`}
+  </div>
+  <div class="panel small">
+    <b>Workplace</b>
+    <p style="margin:6px 0">${esc(pr.workplace?.name||"")}<br><span class="muted">${esc(pr.workplace?.address||"")}</span></p>
+    <b>Commute estimates by locality</b>
+    <p class="muted" style="margin:4px 0 8px">Rough driving-time ranges from the locality to EY Coral at office hours. They are locality-level estimates, not routed per address, and use no live traffic. Treat them as a guide and check with a maps app before deciding.</p>
+    <table class="rep">${commuteRows}</table>
+  </div>
+  <div class="panel small">
+    <b>People</b>
+    <p class="muted" style="margin:4px 0 8px">People listed here can sign in with their email and see the dashboard, the shortlist, comments and votes. Private notes stay private.</p>
+    <table class="rep">${S.members.map(m=>`<tr><td>${esc(m.email)}</td><td>${esc(m.role)}</td><td>${(!ro&&m.role!=="owner")?`<a href="#settings" data-rm="${esc(m.email)}">Remove</a>`:""}</td></tr>`).join("")}</table>
+    ${ro?"":`<form id="inviteForm" class="cmtform"><input type="email" id="inviteEmail" placeholder="friend@example.com" aria-label="Email to invite"><button type="submit">Invite</button></form>
+    <p class="muted" style="margin-top:6px">After inviting, send them the site link. They sign in with that email.</p>`}
+    <div class="actions"><button id="signOutBtn">Sign out (${esc(S.email||"")})</button></div>
+  </div>`;
+  const sp=$("#savePrefs"); if(sp) sp.onclick=savePrefs;
+  const so=$("#signOutBtn"); if(so) so.onclick=signOut;
+  const inv=$("#inviteForm"); if(inv) inv.onsubmit=async e=>{ e.preventDefault(); const em=$("#inviteEmail").value.trim().toLowerCase();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return toast("Enter a valid email");
+    const {error}=await S.sb.from("members").insert({email:em,role:"member"}); if(error) return toast(error.code==="23505"?"Already invited":"Couldn't invite");
+    toast("Invited "+em); loadMembers(); };
+  document.querySelectorAll("[data-rm]").forEach(a=>a.onclick=async e=>{ e.preventDefault(); const em=a.dataset.rm;
+    if(a.dataset.sure!=="1"){ a.dataset.sure="1"; a.textContent="Tap again to remove"; return; }
+    const {error}=await S.sb.from("members").delete().eq("email",em); if(error) return toast("Couldn't remove"); toast("Removed "+em); loadMembers(); });
+}
+async function savePrefs(){
+  const num=id=>{ const n=parseInt(String($(id).value).replace(/[^0-9]/g,""),10); return n>0?n:null; };
+  const minRent=num("#pMin"), maxRent=num("#pMax"), maxCommute=num("#pCommute");
+  if (minRent && maxRent && minRent>maxRent) return toast("Min rent is above max rent");
+  if (maxRent && maxRent>500000) return toast("Max rent looks too high");
+  const locs=$("#pLocs").value.split("\n").map(s=>s.trim().replace(/[^\p{L}\p{N} .,'-]/gu,"").slice(0,60)).filter(Boolean).slice(0,25);
+  if(!locs.length) return toast("Add at least one locality");
+  const patch={ searchEnabled:$("#pEnabled").checked, propertyType:$("#pType").value.slice(0,60),
+    minRent, maxRent, maxCommute, localities:locs,
+    facing:[...document.querySelectorAll("[data-facing]:checked")].map(x=>x.dataset.facing),
+    furnishing:[...document.querySelectorAll("[data-furn]:checked")].map(x=>x.dataset.furn),
+    amenities:[...document.querySelectorAll("[data-amen]:checked")].map(x=>x.dataset.amen),
+    updatedAt:new Date().toISOString() };
+  const data={...S.prefs, ...patch};
+  const {error}=await S.sb.from("prefs").update({data, updated_at:new Date().toISOString()}).eq("id",1);
+  if(error) return toast("Only the owner can change preferences");
+  S.prefs=data; toast("Preferences saved"); render();
+}
+
+// ---------- report ----------
+function renderReport(){
+  const run=S.runs[0]; const el=$("#reportBody");
+  if(!run){ el.innerHTML=`<div class="empty">No search has run yet.</div>`; }
+  else {
+    const r=run.report||{};
+    const top=(r.top||[]).map(id=>S.props.find(p=>p.id===id)).filter(Boolean);
+    el.innerHTML=`<div class="panel">
+      <b>${esc(fmtDT(run.finishedAt||run.startedAt)||"")}</b> · <span class="tag ${run.status==="success"?"ok":run.status==="failed"?"bad":"warn"}">${esc(run.status)}</span>
+      <p style="margin:8px 0">${esc(r.summary||"")}</p>
+      <table class="rep">
+        <tr><td>Listings seen</td><td>${run.found??"–"}</td></tr>
+        <tr><td>New listings</td><td>${run.newCount??"–"}</td></tr>
+        <tr><td>Match all main criteria</td><td>${run.matchCount??"–"}</td></tr>
+        <tr><td>Sources</td><td>${esc((run.sources||[]).join(", "))}</td></tr>
+      </table>
+      ${run.error?`<div class="banner bad" style="margin-top:10px">${esc(run.error)}</div>`:""}
+      ${r.needsConfirmation?`<p class="small muted">Still to confirm for every listing: ${esc(r.needsConfirmation)}</p>`:""}
+    </div>
+    ${top.length?`<h2>Best matches in this run</h2>`+top.map(p=>cardHTML(p,evaluate(p))).join(""):`<div class="empty">${run.newCount===0?"No suitable new listings in this run.":""}</div>`}`;
+  }
+  $("#runList").innerHTML = S.runs.length? `<div class="panel"><table class="rep">${S.runs.slice(0,30).map(r=>`<tr><td>${esc(fmtDT(r.finishedAt||r.startedAt)||"")}</td><td>${esc(r.status)}</td><td>${r.found??"–"} seen · ${r.newCount??"–"} new</td></tr>`).join("")}</table></div>` : "";
+}
+
+// ---------- dashboard ----------
+function renderHome(){
+  const active=S.props.filter(p=>p.status!=="gone");
+  const evals=active.map(p=>({p,e:evaluate(p)}));
+  $("#sNew").textContent = S.status ? active.filter(isNew).length : "–";
+  $("#sMatch").textContent = evals.filter(x=>x.e.majorOk && !(S.marks[x.p.id]||{}).rejected).length;
+  $("#sFav").textContent = Object.keys(S.shortlist).length;
+  $("#sTotal").textContent = active.length;
+  const st=S.status, pr=S.prefs;
+  let h="";
+  if(!st) h=`<span class="muted">No search has run yet.</span>`;
+  else {
+    h=`<div>Last successful search: <b>${esc(fmtDT(st.lastSuccessAt)||"Never")}</b></div>
+       <div>Last attempt: ${esc(fmtDT(st.lastRunAt)||"–")} · <span class="tag ${st.lastStatus==="success"?"ok":st.lastStatus==="failed"?"bad":"warn"}">${esc(st.lastStatus||"–")}</span></div>
+       <div>Next scheduled search: <b>${pr && pr.searchEnabled===false ? "Paused" : esc(fmtDT(st.nextRunAt)||"–")}</b></div>
+       ${st.lastError?`<div class="banner bad" style="margin:8px 0 0">${esc(st.lastError)}</div>`:""}
+       <div class="muted" style="margin-top:6px">Sources: ${esc((st.sources||[]).join(", ")||"–")}</div>`;
+  }
+  $("#statusPanel").innerHTML=h;
+  const newOnes=evals.filter(x=>isNew(x.p) && !(S.marks[x.p.id]||{}).rejected).sort((a,b)=>b.e.score-a.e.score).slice(0,5);
+  const best = newOnes.length? newOnes : evals.filter(x=>x.e.majorOk && !(S.marks[x.p.id]||{}).rejected).sort((a,b)=>b.e.score-a.e.score).slice(0,5);
+  $("#homeNew").innerHTML = !S.loaded.props? `<div class="empty">Loading listings…</div>` :
+    best.length ? (newOnes.length?"":`<p class="small muted">No new matches in the latest search. Showing current best matches.</p>`) + best.map(x=>cardHTML(x.p,x.e)).join("")
+    : `<div class="empty">No matching listings yet.</div>`;
+  const recent=Object.entries(S.marks).filter(([,m])=>m.viewedAt).sort((a,b)=>b[1].viewedAt.localeCompare(a[1].viewedAt)).slice(0,3)
+    .map(([id])=>S.props.find(p=>p.id===id)).filter(Boolean);
+  $("#homeRecent").innerHTML = recent.length? recent.map(p=>cardHTML(p,evaluate(p))).join("") : `<div class="empty small">Listings you open will appear here.</div>`;
+}
+
+function renderList(){
+  if(!S.loaded.props){ $("#list").innerHTML=`<div class="empty">Loading listings…</div>`; return; }
+  const arr=sorted(applyFilters(S.props));
+  const fc=filterCount(); $("#fCount").textContent = fc?`(${fc})`:"";
+  $("#listCount").textContent = `${arr.length} of ${S.props.length} listings`;
+  $("#list").innerHTML = arr.length? arr.map(x=>cardHTML(x.p,x.e)).join("") : `<div class="empty">No listings match these filters.</div>`;
+}
+function renderShortlist(){
+  const ids=Object.keys(S.shortlist); const arr=ids.map(id=>S.props.find(p=>p.id===id)).filter(Boolean);
+  $("#favList").innerHTML = arr.length? sorted(arr).map(x=>cardHTML(x.p,x.e)).join("") : `<div class="empty">Nothing shortlisted yet. Tap ☆ Shortlist on a listing.</div>`;
+}
+let rq=false;
+function render(){ if(rq) return; rq=true; requestAnimationFrame(()=>{ rq=false; renderHome(); renderList(); renderShortlist(); renderReport(); renderPrefs(); }); }
+render();
+
+// ---------- data wiring ----------
+function showGlobal(html, cls="warn"){ $("#globalMsg").innerHTML = html? `<div class="banner ${cls}">${html}</div>` : ""; }
+function showApp(on){ document.querySelectorAll(".view").forEach(v=>v.style.display=on?"":"none"); $("#nav").style.display=on?"":"none"; }
+async function fetchJSON(path){ const r=await fetch(path+"?t="+Date.now(),{cache:"no-store"}); if(!r.ok) throw new Error(path+" "+r.status); return r.json(); }
+async function loadListings(){
+  try{
+    const [l,m]=await Promise.all([fetchJSON("data/listings.json"), fetchJSON("data/meta.json")]);
+    S.props=l.listings||[]; S.status=m.status||null; S.runs=m.runs||[]; S.loaded.props=true; showGlobal("");
+  }catch(e){ S.loaded.props=true; showGlobal("Couldn't load listings. Check your connection and reopen the page.","bad"); }
+  render();
+}
+async function loadPrefs(){ const {data}=await S.sb.from("prefs").select("data").eq("id",1).maybeSingle(); S.prefs=data?data.data:null; S.loaded.prefs=true; render(); }
+async function loadShortlist(){ const {data}=await S.sb.from("shortlist").select("*"); const o={}; (data||[]).forEach(r=>o[r.prop_id]=r); S.shortlist=o; render(); }
+async function loadMarks(){ const {data}=await S.sb.from("marks").select("*").eq("user_id",S.uid); const o={}; (data||[]).forEach(r=>o[r.prop_id]={contacted:r.contacted,rejected:r.rejected,confirmed:r.confirmed,notes:r.notes,viewedAt:r.viewed_at}); S.marks=o; render(); }
+async function loadComments(){ const {data}=await S.sb.from("comments").select("*").order("created_at"); const o={}; (data||[]).forEach(r=>(o[r.prop_id]=o[r.prop_id]||[]).push(r)); S.comments=o; render(); }
+async function loadVotes(){ const {data}=await S.sb.from("votes").select("*"); const o={}; (data||[]).forEach(r=>(o[r.prop_id]=o[r.prop_id]||[]).push(r)); S.votes=o; render(); }
+async function loadMembers(){ const {data}=await S.sb.from("members").select("*").order("added_at"); S.members=data||[]; render(); }
+async function signOut(){ await S.sb.auth.signOut(); location.hash=""; location.reload(); }
+
+async function startSession(session){
+  S.session=session; S.uid=session.user.id; S.email=(session.user.email||"").toLowerCase();
+  const {data:me}=await S.sb.from("members").select("email,role").eq("email",S.email).maybeSingle();
+  if(!me){ $("#loginView").style.display="none"; $("#notMember").style.display=""; $("#nmEmail").textContent=S.email; showApp(false); return; }
+  S.member=true; S.canWrite=true; S.isOwner = me.role==="owner";
+  $("#loginView").style.display="none"; $("#notMember").style.display="none"; showApp(true); route();
+  await Promise.all([loadListings(), loadPrefs(), loadShortlist(), loadMarks(), loadComments(), loadVotes(), loadMembers()]);
+  S.sb.channel("collab").on("postgres_changes",{event:"*",schema:"public",table:"shortlist"},loadShortlist)
+    .on("postgres_changes",{event:"*",schema:"public",table:"comments"},loadComments)
+    .on("postgres_changes",{event:"*",schema:"public",table:"votes"},loadVotes).subscribe();
+}
+
+(async()=>{
+  const cfg=window.FMH_CONFIG||{};
+  if(!window.supabase || !cfg.supabaseUrl){ showGlobal("Setup isn't finished yet (sign-in service not configured).","bad"); showApp(false); return; }
+  S.sb=window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:"pkce"}});
+  showApp(false);
+  $("#loginForm").onsubmit=async e=>{ e.preventDefault(); const em=$("#loginEmail").value.trim().toLowerCase(); if(!em) return;
+    $("#loginBtn").disabled=true; $("#loginMsg").textContent="Sending…";
+    const {error}=await S.sb.auth.signInWithOtp({email:em, options:{emailRedirectTo: location.origin+location.pathname}});
+    $("#loginBtn").disabled=false;
+    $("#loginMsg").textContent = error ? (/rate/i.test(error.message)?"Too many sign-in emails just now. Please wait an hour and try again.":"Couldn't send the link: "+error.message) : "Check your inbox for a link from Supabase and open it on this device.";
+  };
+  $("#nmSignOut").onclick=signOut;
+  const {data:{session}}=await S.sb.auth.getSession();
+  if(session) await startSession(session); else $("#loginView").style.display="";
+  S.sb.auth.onAuthStateChange((ev,sess)=>{ if(ev==="SIGNED_IN" && sess && !S.member) startSession(sess); });
+})();
+})();
+</script>
+</body>
+</html>
