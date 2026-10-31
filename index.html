@@ -7,6 +7,8 @@
 <meta name="robots" content="noindex,nofollow">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 :root{--ink:#18332d;--muted:#6b7d77;--bg:#f4f7f4;--card:#fff;--line:#e2e9e4;--brand:#176b52;--brand-ink:#fff;--brand-soft:#e5f3eb;--gold:#f2d48b;
   --warn:#654b14;--warn-soft:#fff5dc;--bad:#9b2c22;--new:#1f4fb8;--new-soft:#e7eefc;--fav:#b4530f;--r:17px;--bad-soft:#fdece9}
@@ -22,6 +24,22 @@ nav a{flex:0 0 auto;text-decoration:none;color:#fff;padding:7px 12px;border-radi
 nav a.on{background:#fff;color:var(--brand);border-color:#fff}
 main{padding:16px 16px calc(env(safe-area-inset-bottom) + 30px);max-width:850px;margin:0 auto}
 .view{display:none}.view.on{display:block}
+#mapWrap{position:relative;margin:0 -12px}
+#map{height:calc(100vh - 230px);height:calc(100dvh - 230px);min-height:360px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#e8eee9}
+.pin{background:#fff;color:var(--ink);border:1.5px solid var(--brand);border-radius:999px;padding:3px 7px;font:700 12px/1.2 system-ui,sans-serif;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);transform:translate(-50%,-50%);display:inline-block}
+.pin.m{background:var(--brand);color:#fff}
+.pin.ap{border-style:dashed;opacity:.85}
+.pin.sel{background:var(--fav);border-color:var(--fav);color:#fff;z-index:1000}
+.office{background:#1f4fb8;color:#fff;border:2px solid #fff;border-radius:999px;padding:5px 9px;font:700 12px/1.2 system-ui,sans-serif;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.35);transform:translate(-50%,-100%);display:inline-block;cursor:grab}
+.leaflet-div-icon{background:none;border:0}
+.mapbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 8px}
+.mapbar .small{flex:1 1 100%}
+#mapCard{position:absolute;left:10px;right:10px;bottom:10px;z-index:900;display:none}
+#mapCard.on{display:block}
+#mapCard .mc{background:#fff;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.25);padding:12px 14px}
+#mapCard .mc h3{font-size:15px;margin:0 30px 4px 0}
+#mapCard .x{position:absolute;right:8px;top:6px;border:0;background:none;font-size:20px;min-height:0;padding:4px 8px}
+.dist{display:inline-block;background:var(--new-soft);color:var(--new);border-radius:999px;padding:3px 9px;font-size:12px;font-weight:650;margin:4px 0}
 h2{font-size:17px;margin:20px 2px 12px}
 h2:first-child{margin-top:4px}
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
@@ -114,6 +132,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
   <nav id="nav">
     <a href="#home" data-v="home">Dashboard</a>
     <a href="#listings" data-v="listings">Listings</a>
+    <a href="#map" data-v="map">Map</a>
     <a href="#shortlist" data-v="shortlist">Shortlist</a>
     <a href="#report" data-v="report">Daily report</a>
     <a href="#settings" data-v="settings">Preferences</a>
@@ -162,6 +181,16 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
     <div id="list"></div>
   </section>
 
+  <section class="view" id="v-map">
+    <div class="mapbar">
+      <button id="mapRecenter" type="button">Show all</button>
+      <button id="mapOfficeBtn" type="button">Go to office</button>
+      <button id="mapSaveOffice" type="button" style="display:none" class="primary">Save office pin</button>
+      <span class="small muted" id="mapStatus">Loading map…</span>
+    </div>
+    <div id="mapWrap"><div id="map" role="application" aria-label="Map of listings"></div><div id="mapCard"></div></div>
+    <p class="small muted">The blue pin is your office: drag it to move it. Listing pins show rent; green pins match all your main criteria, and dashed pins are approximate (placed at the area centre because the listing has no usable address). Distances are straight-line. Tap Directions for real driving time with traffic. The map shows the listings that pass your Listings filters.</p>
+  </section>
   <section class="view" id="v-shortlist">
     <div class="banner ok small">The shortlist is shared with anyone you give access to this page. Your notes and contacted/rejected marks stay private to you.</div>
     <div id="favList"></div>
@@ -232,13 +261,14 @@ const S = { sb:null, session:null, email:null, uid:null, member:false, canWrite:
   loaded:{props:false,prefs:false}, filters: lsGet("fmh.filters", {}), sort: lsGet("fmh.sort","score") };
 
 // ---------- routing ----------
-const VIEWS = ["home","listings","shortlist","report","settings"];
+const VIEWS = ["home","listings","map","shortlist","report","settings"];
 function route(){
   const h = location.hash.replace("#","");
   const v = VIEWS.includes(h) ? h : "home";
   VIEWS.forEach(x => $("#v-"+x).classList.toggle("on", x===v));
   document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("on", a.dataset.v===v));
   window.scrollTo(0,0);
+  if (v==="map" && window.mapShow) setTimeout(window.mapShow, 0);
 }
 window.addEventListener("hashchange", route); route();
 
@@ -407,6 +437,7 @@ function cardHTML(p, e){
     ["Facing", p.facing],["Furnishing", p.furnishing],
     ["Security deposit", inr(p.deposit)],["Brokerage", p.brokerageText || (p.brokerage===0?"None":null)],
     ["Commute to EY Coral", commuteText(e.commute)],
+    ["Distance to office", distText(p)],
   ];
   const more = [
     ["Property type", p.propertyType],["Gated community", yn(p.gated)],["Lift", yn(p.lift)],["Parking", p.parking],
@@ -751,8 +782,139 @@ function renderRun(){
   msg.innerHTML=S.runMsg?`<p class="small ${S.runState==="error"?"":"muted"}" style="margin:6px 0 0">${esc(S.runMsg)}</p>`:`<p class="small muted" style="margin:6px 0 0">Run search now uses your saved preferences (unsaved changes are saved first).</p>`;
   $("#runNowBtn").onclick=async()=>{ if(S.prefsDirty){ const ok=await savePrefs(); if(!ok) return; } runNow(); };
 }
+// ---------- map ----------
+const GEO_KEY="fmh_geo_v1", OFFICE_KEY="fmh_office_v1";
+const DEFAULT_OFFICE={lat:12.9791,lon:77.6967,name:"EY GDS Coral, Bagmane WTC"};
+const GEO=(()=>{ try{ return JSON.parse(localStorage.getItem(GEO_KEY)||"{}")||{}; }catch{ return {}; } })();
+function geoSave(){ try{ localStorage.setItem(GEO_KEY, JSON.stringify(GEO)); }catch{} }
+function officePos(){
+  const w=(S.prefs&&S.prefs.workplace)||{};
+  if(typeof w.lat==="number" && typeof w.lon==="number") return {lat:w.lat,lon:w.lon,name:w.name||DEFAULT_OFFICE.name};
+  try{ const o=JSON.parse(localStorage.getItem(OFFICE_KEY)||"null"); if(o && typeof o.lat==="number") return {...o,name:w.name||DEFAULT_OFFICE.name}; }catch{}
+  return {...DEFAULT_OFFICE, name:w.name||DEFAULT_OFFICE.name};
+}
+function kmBetween(a,b){ const R=6371,t=x=>x*Math.PI/180; const dLa=t(b.lat-a.lat), dLo=t(b.lon-a.lon);
+  const h=Math.sin(dLa/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dLo/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
+function distText(p){ const g=GEO["L:"+p.id]; if(!g) return null; const d=kmBetween(officePos(),g);
+  return `${d<1?d.toFixed(1):d.toFixed(1)} km straight line${g.q==="area"?" (approx., area centre)":""}`; }
+const photon=async q=>{ const r=await fetch("https://photon.komoot.io/api/?limit=3&lang=en&lat=12.97&lon=77.68&bbox=77.35,12.75,77.90,13.20&q="+encodeURIComponent(q)); if(!r.ok) throw new Error("geo "+r.status);
+  const j=await r.json(); return (j.features||[]).filter(f=>/karnataka/i.test((f.properties||{}).state||"")).map(f=>({lat:f.geometry.coordinates[1],lon:f.geometry.coordinates[0]})); };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function hashJit(id){ let h=0; for(const c of id) h=(h*31+c.charCodeAt(0))|0; return [((h&255)/255-.5)*0.006, (((h>>8)&255)/255-.5)*0.006]; }
+async function areaCentre(loc){
+  const k="A:"+norm(loc); if(GEO[k]) return GEO[k];
+  const res=await photon(loc+", Bengaluru"); await sleep(250);
+  if(res[0]){ GEO[k]={...res[0],t:Date.now()}; geoSave(); return GEO[k]; } return null;
+}
+function cleanAddr(a){ return String(a||"").replace(/\b(near|opp\.?|opposite|beside|behind|next to)\b/gi," ").replace(/\s+/g," ").trim(); }
+async function geocodeListing(p){
+  const k="L:"+p.id; if(GEO[k]) return GEO[k];
+  const c=p.locality? await areaCentre(p.locality) : null;
+  const ok=g=>g && (!c || kmBetween(c,g)<=4);
+  const tries=[];
+  if(p.society && p.society.length>2) tries.push([p.society+", "+(p.locality||"")+", Bengaluru","society"]);
+  if(p.address) tries.push([cleanAddr(p.address)+", "+(p.locality||"")+", Bengaluru","address"]);
+  for(const [q,kind] of tries){
+    try{ const res=await photon(q); await sleep(250); const g=res.find(ok); if(g){ GEO[k]={lat:g.lat,lon:g.lon,q:kind}; geoSave(); return GEO[k]; } }catch{ await sleep(500); }
+  }
+  if(c){ const [a,b]=hashJit(p.id); GEO[k]={lat:c.lat+a,lon:c.lon+b,q:"area"}; geoSave(); return GEO[k]; }
+  return null;
+}
+const MAP={map:null,layer:null,office:null,markers:{},sel:null,busy:false,dirtyOffice:false};
+function kfmt(n){ return typeof n==="number"? "₹"+(n>=1000?(Math.round(n/100)/10).toString().replace(/\.0$/,"")+"k":n) : "?"; }
+function mapList(){ return applyFilters(S.props).filter(p=>p.status!=="gone"); }
+function drawPins(){
+  if(!MAP.map) return;
+  MAP.layer.clearLayers(); MAP.markers={};
+  for(const p of mapList()){
+    const g=GEO["L:"+p.id]; if(!g) continue;
+    const m=evaluate(p).majorOk;
+    const icon=L.divIcon({className:"",html:`<span class="pin ${m?"m":""} ${g.q==="area"?"ap":""} ${MAP.sel===p.id?"sel":""}">${kfmt(p.rent)}</span>`,iconSize:null});
+    const mk=L.marker([g.lat,g.lon],{icon,title:(p.title||"")+" · "+kfmt(p.rent),keyboard:true}).addTo(MAP.layer);
+    mk.on("click",()=>selectPin(p.id)); MAP.markers[p.id]=mk;
+  }
+}
+function selectPin(id){
+  MAP.sel=id; drawPins();
+  const p=S.props.find(x=>x.id===id); if(!p) return;
+  const g=GEO["L:"+id]; const o=officePos(); const d=g?kmBetween(o,g):null;
+  const dir=g?`https://www.google.com/maps/dir/?api=1&origin=${g.lat},${g.lon}&destination=${o.lat},${o.lon}&travelmode=driving`:null;
+  const el=$("#mapCard");
+  el.innerHTML=`<div class="mc"><button class="x" id="mcClose" aria-label="Close">×</button>
+    <h3>${esc(p.title||"Listing")}</h3>
+    <div><b>${esc(inr(p.rent)||"")}</b>${p.maintenance?` <span class="small muted">+ ${esc(inr(p.maintenance))} maint.</span>`:""} <span class="small muted">· ${esc(p.locality||"")}</span></div>
+    ${d!=null?`<span class="dist">${d.toFixed(1)} km to office (straight line)${g.q==="area"?" · approx.":""}</span> <span class="small muted" id="mcRoad"></span>`:""}
+    <div class="small muted">${esc([p.furnishing,p.areaSqft?p.areaSqft+" sq ft":null,p.facing?p.facing+" facing":null,p.parking?("Parking: "+p.parking):null].filter(Boolean).join(" · "))}</div>
+    <div class="actions"><a class="btn primary" href="${esc(p.url)}" target="_blank" rel="noopener">Open listing ↗</a>${dir?`<a class="btn" href="${dir}" target="_blank" rel="noopener">Directions</a>`:""}</div></div>`;
+  el.classList.add("on");
+  $("#mcClose").onclick=()=>{ el.classList.remove("on"); MAP.sel=null; drawPins(); };
+  if(g) roadDist(g,o).then(t=>{ const r=$("#mcRoad"); if(r&&t&&MAP.sel===id) r.textContent=t; });
+}
+async function roadDist(g,o){
+  try{ const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${g.lon},${g.lat};${o.lon},${o.lat}?overview=false`); if(!r.ok) return null;
+    const j=await r.json(); const rt=j.routes&&j.routes[0]; if(!rt) return null;
+    return `≈ ${(rt.distance/1000).toFixed(1)} km by road`; }catch{ return null; }
+}
+function placeOffice(){
+  const o=officePos();
+  const icon=L.divIcon({className:"",html:`<span class="office">🏢 Office</span>`,iconSize:null});
+  if(MAP.office) MAP.office.setLatLng([o.lat,o.lon]);
+  else { MAP.office=L.marker([o.lat,o.lon],{icon,draggable:true,zIndexOffset:2000,title:"Office (drag to move)"}).addTo(MAP.map);
+    MAP.office.on("dragend",()=>{ const ll=MAP.office.getLatLng(); const v={lat:+ll.lat.toFixed(6),lon:+ll.lng.toFixed(6)};
+      try{ localStorage.setItem(OFFICE_KEY, JSON.stringify(v)); }catch{}
+      if(S.prefs) S.prefs.workplace={...(S.prefs.workplace||{}),...v};
+      MAP.dirtyOffice=true; $("#mapSaveOffice").style.display=S.canWrite?"":"none";
+      $("#mapStatus").textContent=S.canWrite?"Office moved. Tap Save office pin to keep it for everyone.":"Office moved on this device. Enter the passcode to save it for everyone.";
+      if(MAP.sel) selectPin(MAP.sel); render(); });
+  }
+}
+async function saveOffice(){
+  const v=officePos(); const data={...S.prefs, workplace:{...(S.prefs.workplace||{}),lat:v.lat,lon:v.lon}};
+  const {error}=await S.sb.from("prefs").update({data, updated_at:new Date().toISOString()}).eq("id",1);
+  if(error) return toast("Couldn't save the office pin");
+  S.prefs=data; MAP.dirtyOffice=false; $("#mapSaveOffice").style.display="none"; $("#mapStatus").textContent="Office pin saved."; toast("Office pin saved");
+}
+function fitAll(){
+  const pts=mapList().map(p=>GEO["L:"+p.id]).filter(Boolean).map(g=>[g.lat,g.lon]); const o=officePos(); pts.push([o.lat,o.lon]);
+  if(pts.length>1) MAP.map.fitBounds(pts,{padding:[30,30],maxZoom:15}); else MAP.map.setView([o.lat,o.lon],13);
+}
+async function geocodeAll(){
+  if(MAP.busy) return; MAP.busy=true;
+  const todo=mapList().filter(p=>!GEO["L:"+p.id]);
+  let n=0;
+  for(const p of todo){
+    n++; $("#mapStatus").textContent=`Placing listings on the map… ${n}/${todo.length}`;
+    try{ await geocodeListing(p); }catch{}
+    if(n%5===0) drawPins();
+  }
+  MAP.busy=false; drawPins();
+  const L2=mapList(); const placed=L2.filter(p=>GEO["L:"+p.id]).length;
+  if(!MAP.dirtyOffice) $("#mapStatus").textContent=`${placed} of ${L2.length} listings on the map.`;
+  if(todo.length) { render(); if(!MAP.fitted){ fitAll(); MAP.fitted=true; } }
+}
+window.mapShow=function(){
+  if(!window.L){ $("#mapStatus").textContent="The map couldn't load. Check your connection and reload."; return; }
+  if(!MAP.map){
+    const o=officePos();
+    MAP.map=L.map("map",{zoomControl:true}).setView([o.lat,o.lon],13);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(MAP.map);
+    MAP.layer=L.layerGroup().addTo(MAP.map);
+    placeOffice();
+    $("#mapRecenter").onclick=fitAll;
+    $("#mapOfficeBtn").onclick=()=>{ const o=officePos(); MAP.map.setView([o.lat,o.lon],15); };
+    $("#mapSaveOffice").onclick=saveOffice;
+  } else { MAP.map.invalidateSize(); placeOffice(); }
+  const w=(S.prefs&&S.prefs.workplace)||{};
+  if(typeof w.lat!=="number" && !MAP.triedOffice){ MAP.triedOffice=true;
+    photon("Bagmane World Technology Center, Mahadevapura").then(res=>{ const g=res.find(x=>kmBetween(DEFAULT_OFFICE,x)<3);
+      let saved=null; try{ saved=localStorage.getItem(OFFICE_KEY); }catch{}
+      if(g && !saved){ DEFAULT_OFFICE.lat=g.lat; DEFAULT_OFFICE.lon=g.lon; placeOffice(); drawPins(); } }).catch(()=>{}); }
+  drawPins();
+  if(!MAP.fitted && mapList().some(p=>GEO["L:"+p.id])){ fitAll(); MAP.fitted=true; }
+  if(S.loaded.props) geocodeAll(); else $("#mapStatus").textContent="Loading listings…";
+};
 let rq=false;
-function render(){ if(rq) return; rq=true; requestAnimationFrame(()=>{ rq=false; renderHome(); renderList(); renderShortlist(); renderReport(); renderPrefs(); renderRun(); }); }
+function render(){ if(rq) return; rq=true; requestAnimationFrame(()=>{ rq=false; renderHome(); renderList(); renderShortlist(); renderReport(); renderPrefs(); renderRun(); if(MAP.map && $("#v-map").classList.contains("on")){ drawPins(); if(S.loaded.props && !MAP.busy && mapList().some(p=>!GEO["L:"+p.id])) geocodeAll(); } }); }
 render();
 
 // ---------- data wiring ----------
