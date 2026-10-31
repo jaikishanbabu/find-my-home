@@ -1,136 +1,193 @@
 {
- "status": {
-  "lastRunAt": "2026-10-31T18:16:04Z",
-  "lastSuccessAt": "2026-10-31T18:16:04Z",
-  "lastStatus": "success",
-  "lastSuccessRunId": "run-20261031",
-  "lastError": null,
-  "nextRunAt": "2026-11-01T02:20:00Z",
-  "schedule": "Daily 7:50 AM IST",
-  "sources": [
-   "NoBroker"
-  ]
- },
- "runs": [
-  {
-   "id": "run-20261031",
-   "startedAt": "2026-10-31T18:14:35Z",
-   "finishedAt": "2026-10-31T18:16:04Z",
-   "status": "success",
-   "found": 58,
-   "newCount": 20,
-   "matchCount": 21,
-   "sources": [
-    "NoBroker (locality pages)"
-   ],
-   "report": {
-    "summary": "Test run straight after setup. It searched all 6 localities, including Doddanekundi, which failed earlier, and added 20 new listings, for 60 tracked in total. 21 listings are full matches. Best current picks: Srikar Residency in Kaggadasapura (₹31k, west-facing, lift, ₹62k deposit), Muraleeravam in Mahadevapura (₹35k, east-facing, gated, lift), Parimala Winsome in Marathahalli (₹30k, west-facing, lift), an east-facing AECS Layout house in Marathahalli (₹32k, car parking) and new Sangam Paradise in Doddanekundi (₹30k, lift).",
-    "top": [
-     "nobroker-8a9fb3827ecfc74f017ed01cf9ba1a73",
-     "nobroker-8a9f9f8477628a1a0177629841c604cc",
-     "nobroker-8a9fc1827f63d618017f63e363120574",
-     "nobroker-8aa9b206a081701701a0843ecd6623b1",
-     "nobroker-8a9f8b8497db1d350197db8db24e28e2"
-    ],
-    "needsConfirmation": "actual availability, water supply and exact commute."
-   }
+  "status": {
+    "lastRunAt": "2026-10-31T19:15:03Z",
+    "lastSuccessAt": "2026-10-31T19:15:03Z",
+    "lastStatus": "partial",
+    "lastSuccessRunId": "run-20261101",
+    "lastError": "Kaggadasapura flats page refused; independent-house page used instead and Kaggadasapura listings were not marked as missed",
+    "nextRunAt": "2026-11-01T02:20:00Z",
+    "schedule": "Daily 7:50 AM IST",
+    "sources": [
+      "NoBroker"
+    ]
   },
-  {
-   "id": "run-20261031-initial",
-   "startedAt": "2026-10-31T17:58:00Z",
-   "finishedAt": "2026-10-31T18:05:00Z",
-   "status": "success",
-   "found": 40,
-   "newCount": 40,
-   "matchCount": 24,
-   "sources": [
-    "NoBroker (locality pages + listing pages)"
-   ],
-   "report": {
-    "summary": "First search: 40 owner-listed 2 BHKs saved from 5 localities.",
-    "top": [],
-    "needsConfirmation": "actual availability, water supply, balcony and exact commute."
-   }
-  }
- ],
- "prefs": {
-  "searchEnabled": true,
-  "minRent": 30000,
-  "maxRent": 35000,
-  "maxCommute": 30,
-  "localities": [
-   "Kaggadasapura",
-   "Mahadevapura",
-   "Kadubeesanahalli",
-   "Doddanekundi",
-   "Hoodi",
-   "Brookefield"
+  "runs": [
+    {
+      "id": "run-20261101",
+      "startedAt": "2026-10-31T19:00:15Z",
+      "finishedAt": "2026-10-31T19:15:03Z",
+      "status": "partial",
+      "found": 30,
+      "newCount": 14,
+      "matchCount": 28,
+      "sources": [
+        "NoBroker (locality pages)"
+      ],
+      "localitiesSearched": [
+        "Kaggadasapura",
+        "Mahadevapura",
+        "Kadubeesanahalli",
+        "Doddanekundi",
+        "Hoodi",
+        "Brookefield"
+      ],
+      "localitiesFailed": [
+        "Kaggadasapura"
+      ],
+      "error": "Kaggadasapura flats page refused; independent-house page used instead and Kaggadasapura listings were not marked as missed",
+      "report": {
+        "summary": "Added 14 new listings; 28 active listings are full matches (₹30–35k, ≤30 min commute). Best new picks: Amrutha Sparkling Nest in Mahadevapura (₹34k, lift, gated security, car parking, north-facing), a Pragathi Layout flat in Doddanekundi (₹31k, lift, maintenance included) and a south-east-facing house in Vignan Nagar, Doddanekundi (₹30k, car parking). Ashirwaad Residency in Mahadevapura is east-facing with a lift but at ₹38k is above budget; Kaggadasapura's flats page could not be fetched (only its independent-house page was read).",
+        "top": [
+          "nobroker-ff808181658424e7016584ab144f4045",
+          "nobroker-8a9fb2839463a06b019463b4635b0422",
+          "nobroker-8aa99713a00456f401a00500fa0907bf",
+          "nobroker-8aa98584a191bc5501a191d5d23c0e94",
+          "nobroker-8a9fb083957949e7019579b242b03255"
+        ],
+        "needsConfirmation": "actual availability, facing for listings without it, water supply, exact commute; Mathapathi Regency detail page says listed by broker; 3 detail pages could not be opened."
+      }
+    },
+    {
+      "id": "run-20261031",
+      "startedAt": "2026-10-31T18:14:35Z",
+      "finishedAt": "2026-10-31T18:16:04Z",
+      "status": "success",
+      "found": 58,
+      "newCount": 20,
+      "matchCount": 21,
+      "sources": [
+        "NoBroker (locality pages)"
+      ],
+      "report": {
+        "summary": "Test run straight after setup. It searched all 6 localities, including Doddanekundi, which failed earlier, and added 20 new listings, for 60 tracked in total. 21 listings are full matches. Best current picks: Srikar Residency in Kaggadasapura (₹31k, west-facing, lift, ₹62k deposit), Muraleeravam in Mahadevapura (₹35k, east-facing, gated, lift), Parimala Winsome in Marathahalli (₹30k, west-facing, lift), an east-facing AECS Layout house in Marathahalli (₹32k, car parking) and new Sangam Paradise in Doddanekundi (₹30k, lift).",
+        "top": [
+          "nobroker-8a9fb3827ecfc74f017ed01cf9ba1a73",
+          "nobroker-8a9f9f8477628a1a0177629841c604cc",
+          "nobroker-8a9fc1827f63d618017f63e363120574",
+          "nobroker-8aa9b206a081701701a0843ecd6623b1",
+          "nobroker-8a9f8b8497db1d350197db8db24e28e2"
+        ],
+        "needsConfirmation": "actual availability, water supply and exact commute."
+      }
+    },
+    {
+      "id": "run-20261031-initial",
+      "startedAt": "2026-10-31T17:58:00Z",
+      "finishedAt": "2026-10-31T18:05:00Z",
+      "status": "success",
+      "found": 40,
+      "newCount": 40,
+      "matchCount": 24,
+      "sources": [
+        "NoBroker (locality pages + listing pages)"
+      ],
+      "report": {
+        "summary": "First search: 40 owner-listed 2 BHKs saved from 5 localities.",
+        "top": [],
+        "needsConfirmation": "actual availability, water supply, balcony and exact commute."
+      }
+    }
   ],
-  "facing": [
-   "East",
-   "West"
-  ],
-  "commute": {
-   "Doddanekundi": {
-    "km": 2,
-    "minMin": 8,
-    "maxMin": 15
-   },
-   "Mahadevapura": {
-    "km": 3,
-    "minMin": 10,
-    "maxMin": 20
-   },
-   "Kaggadasapura": {
-    "km": 4,
-    "minMin": 12,
-    "maxMin": 25
-   },
-   "Brookefield": {
-    "km": 5,
-    "minMin": 15,
-    "maxMin": 30
-   },
-   "Hoodi": {
-    "km": 5,
-    "minMin": 15,
-    "maxMin": 30
-   },
-   "Kadubeesanahalli": {
-    "km": 6,
-    "minMin": 18,
-    "maxMin": 35
-   },
-   "Marathahalli": {
-    "km": 4,
-    "minMin": 12,
-    "maxMin": 25
-   },
-   "C V Raman Nagar": {
-    "km": 6,
-    "minMin": 18,
-    "maxMin": 35
-   },
-   "Panathur": {
-    "km": 7,
-    "minMin": 20,
-    "maxMin": 40
-   },
-   "Munnekollal": {
-    "km": 6,
-    "minMin": 18,
-    "maxMin": 35
-   },
-   "Whitefield": {
-    "km": 9,
-    "minMin": 25,
-    "maxMin": 50
-   },
-   "Bellandur": {
-    "km": 9,
-    "minMin": 25,
-    "maxMin": 50
-   }
-  }
- }
+  "prefs": {
+    "facing": [
+      "East",
+      "West"
+    ],
+    "commute": {
+      "Hoodi": {
+        "km": 5,
+        "maxMin": 30,
+        "minMin": 15
+      },
+      "Panathur": {
+        "km": 7,
+        "maxMin": 40,
+        "minMin": 20
+      },
+      "Bellandur": {
+        "km": 9,
+        "maxMin": 50,
+        "minMin": 25
+      },
+      "Whitefield": {
+        "km": 9,
+        "maxMin": 50,
+        "minMin": 25
+      },
+      "Brookefield": {
+        "km": 5,
+        "maxMin": 30,
+        "minMin": 15
+      },
+      "Munnekollal": {
+        "km": 6,
+        "maxMin": 35,
+        "minMin": 18
+      },
+      "Doddanekundi": {
+        "km": 2,
+        "maxMin": 15,
+        "minMin": 8
+      },
+      "Mahadevapura": {
+        "km": 3,
+        "maxMin": 20,
+        "minMin": 10
+      },
+      "Marathahalli": {
+        "km": 4,
+        "maxMin": 25,
+        "minMin": 12
+      },
+      "Kaggadasapura": {
+        "km": 4,
+        "maxMin": 25,
+        "minMin": 12
+      },
+      "C V Raman Nagar": {
+        "km": 6,
+        "maxMin": 35,
+        "minMin": 18
+      },
+      "Kadubeesanahalli": {
+        "km": 6,
+        "maxMin": 35,
+        "minMin": 18
+      }
+    },
+    "maxRent": 35000,
+    "minRent": 30000,
+    "amenities": [
+      "Gated community",
+      "Lift",
+      "Covered parking",
+      "Reliable water",
+      "Security",
+      "Balcony",
+      "No brokerage",
+      "Lower deposit"
+    ],
+    "workplace": {
+      "name": "EY GDS — Coral, Bagmane World Technology Centre (WTC)",
+      "address": "Survey No 34/1–37/2, Marathahalli Outer Ring Road, Doddanekundi Village, Mahadevapura, Bengaluru 560048"
+    },
+    "furnishing": [
+      "Unfurnished",
+      "Semi furnished",
+      "Fully furnished"
+    ],
+    "localities": [
+      "Kaggadasapura",
+      "Mahadevapura",
+      "Kadubeesanahalli",
+      "Doddanekundi",
+      "Hoodi",
+      "Brookefield"
+    ],
+    "maxCommute": 30,
+    "propertyType": "2 BHK apartment",
+    "scheduleLabel": "7:50 AM IST",
+    "searchEnabled": true
+  },
+  "importedFromArtifact": true
 }
