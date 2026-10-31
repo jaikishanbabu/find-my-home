@@ -189,7 +189,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:22px 8px}
       <span class="small muted" id="mapStatus">Loading map…</span>
     </div>
     <div id="mapWrap"><div id="map" role="application" aria-label="Map of listings"></div><div id="mapCard"></div></div>
-    <p class="small muted">Blue pins are your offices (EY Coral, RMZ Infinity, Refyne): drag one to move it. Listing pins show rent; green pins match all your main criteria, and dashed pins are approximate (placed at the area centre because the listing has no usable address). Distances are straight-line. Tap Directions for real driving time with traffic. The map shows the listings that pass your Listings filters.</p>
+    <p class="small muted">Blue pins are your offices (EY Coral, RMZ Infinity, Refyne): drag one to move it. Listing pins show rent; green pins match all your main criteria, and dashed pins are approximate (placed at the area centre because the listing has no usable address). Distances are by road (shortest driving route, no traffic). Tap Directions for live driving time. Rejected listings are hidden. The map shows the listings that pass your Listings filters.</p>
   </section>
   <section class="view" id="v-shortlist">
     <div class="banner ok small">The shortlist is shared with anyone you give access to this page. Your notes and contacted/rejected marks stay private to you.</div>
@@ -800,8 +800,36 @@ function offices(){
 function officePos(){ return offices()[0]; }
 function kmBetween(a,b){ const R=6371,t=x=>x*Math.PI/180; const dLa=t(b.lat-a.lat), dLo=t(b.lon-a.lon);
   const h=Math.sin(dLa/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dLo/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
+const ROAD_KEY="fmh_road_v1";
+const ROAD=(()=>{ try{ return JSON.parse(localStorage.getItem(ROAD_KEY)||"{}")||{}; }catch{ return {}; } })();
+function roadSave(){ try{ localStorage.setItem(ROAD_KEY, JSON.stringify(ROAD)); }catch{} }
+function roadSig(o,g){ return `${o.lat.toFixed(4)},${o.lon.toFixed(4)}>${g.lat.toFixed(5)},${g.lon.toFixed(5)}`; }
+function roadKm(p,o){ const g=GEO["L:"+p.id]; if(!g) return null; const e=ROAD[p.id+"|"+o.id]; return (e && e.s===roadSig(o,g))? e.km : null; }
 function distText(p){ const g=GEO["L:"+p.id]; if(!g) return null;
-  return offices().map(o=>`${o.short||o.name} ${kmBetween(o,g).toFixed(1)} km`).join(" · ")+` (straight line${g.q==="area"?", approx.":""})`; }
+  const parts=offices().map(o=>{ const km=roadKm(p,o); return km==null?null:`${o.short||o.name} ${km.toFixed(1)} km`; });
+  if(parts.some(x=>x==null)) return parts.every(x=>x==null)? "Calculating road distance…" : parts.filter(Boolean).join(" · ");
+  return parts.join(" · ")+` by road${g.q==="area"?" (approx. location)":""}`; }
+let roadBusy=false;
+async function roadAll(){
+  if(roadBusy) return; roadBusy=true;
+  try{
+    for(const o of offices()){
+      const need=mapList().filter(p=>GEO["L:"+p.id] && roadKm(p,o)==null);
+      for(let i=0;i<need.length;i+=80){
+        const chunk=need.slice(i,i+80);
+        const coords=[`${o.lon},${o.lat}`, ...chunk.map(p=>{ const g=GEO["L:"+p.id]; return `${g.lon},${g.lat}`; })].join(";");
+        try{
+          const res=await fetch(`https://router.project-osrm.org/table/v1/driving/${coords}?sources=0&annotations=distance`);
+          if(!res.ok) { await sleep(1500); continue; }
+          const j=await res.json(); const row=(j.distances||[])[0]||[];
+          chunk.forEach((p,k)=>{ const m=row[k+1]; if(typeof m==="number") ROAD[p.id+"|"+o.id]={km:m/1000,s:roadSig(o,GEO["L:"+p.id])}; });
+          roadSave(); render();
+        }catch{}
+        await sleep(1100);
+      }
+    }
+  } finally { roadBusy=false; }
+}
 const photon=async q=>{ const r=await fetch("https://photon.komoot.io/api/?limit=3&lang=en&lat=12.97&lon=77.68&bbox=77.35,12.75,77.90,13.20&q="+encodeURIComponent(q)); if(!r.ok) throw new Error("geo "+r.status);
   const j=await r.json(); return (j.features||[]).filter(f=>/karnataka/i.test((f.properties||{}).state||"")).map(f=>({lat:f.geometry.coordinates[1],lon:f.geometry.coordinates[0]})); };
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -827,7 +855,7 @@ async function geocodeListing(p){
 }
 const MAP={map:null,layer:null,office:null,markers:{},sel:null,busy:false,dirtyOffice:false};
 function kfmt(n){ return typeof n==="number"? "₹"+(n>=1000?(Math.round(n/100)/10).toString().replace(/\.0$/,"")+"k":n) : "?"; }
-function mapList(){ return applyFilters(S.props).filter(p=>p.status!=="gone"); }
+function mapList(){ return applyFilters(S.props).filter(p=>p.status!=="gone" && !(S.marks[p.id]||{}).rejected); }
 function drawPins(){
   if(!MAP.map) return;
   MAP.layer.clearLayers(); MAP.markers={};
@@ -845,21 +873,23 @@ function selectPin(id){
   const g=GEO["L:"+id]; const offs=offices();
   const el=$("#mapCard");
   const rows=g? offs.map(o=>{ const dir=`https://www.google.com/maps/dir/?api=1&origin=${g.lat},${g.lon}&destination=${o.lat},${o.lon}&travelmode=driving`;
-      return `<div class="small" style="display:flex;gap:8px;align-items:center;margin:3px 0"><span class="dist" style="margin:0">${esc(o.short||o.name)}: ${kmBetween(o,g).toFixed(1)} km</span><span class="muted" data-road="${esc(o.id)}"></span><a href="${dir}" target="_blank" rel="noopener" style="margin-left:auto">Directions</a></div>`; }).join("") : "";
+      const km=roadKm(p,o);
+      return `<div class="small" style="display:flex;gap:8px;align-items:center;margin:3px 0"><span class="dist" style="margin:0" data-road="${esc(o.id)}">${esc(o.short||o.name)}: ${km==null?"…":km.toFixed(1)+" km by road"}</span><a href="${dir}" target="_blank" rel="noopener" style="margin-left:auto">Directions</a></div>`; }).join("") : "";
   el.innerHTML=`<div class="mc"><button class="x" id="mcClose" aria-label="Close">×</button>
     <h3>${esc(p.title||"Listing")}</h3>
     <div><b>${esc(inr(p.rent)||"")}</b>${p.maintenance?` <span class="small muted">+ ${esc(inr(p.maintenance))} maint.</span>`:""} <span class="small muted">· ${esc(p.locality||"")}</span></div>
     <div class="small muted">${esc([p.furnishing,p.areaSqft?p.areaSqft+" sq ft":null,p.facing?p.facing+" facing":null,p.parking?("Parking: "+p.parking):null].filter(Boolean).join(" · "))}</div>
     ${rows}${g&&g.q==="area"?`<div class="small muted">Pin is approximate (area centre).</div>`:""}
-    <div class="actions"><a class="btn primary" href="${esc(p.url)}" target="_blank" rel="noopener">Open listing ↗</a></div></div>`;
+    <div class="actions"><a class="btn primary" href="${esc(p.url)}" target="_blank" rel="noopener">Open listing ↗</a><button data-reject="${esc(p.id)}">Reject</button></div></div>`;
   el.classList.add("on");
   $("#mcClose").onclick=()=>{ el.classList.remove("on"); MAP.sel=null; drawPins(); };
-  if(g) offs.forEach(o=>roadDist(g,o).then(t=>{ const r=el.querySelector(`[data-road="${o.id}"]`); if(r&&t&&MAP.sel===id) r.textContent=t; }));
+  if(g) offs.forEach(o=>{ if(roadKm(p,o)!=null) return; roadDist(g,o).then(km=>{ if(km==null) return; ROAD[p.id+"|"+o.id]={km,s:roadSig(o,g)}; roadSave();
+    const r=el.querySelector(`[data-road="${o.id}"]`); if(r&&MAP.sel===id) r.textContent=`${o.short||o.name}: ${km.toFixed(1)} km by road`; }); });
+  const rj=el.querySelector("[data-reject]"); if(rj) rj.onclick=()=>{ el.classList.remove("on"); MAP.sel=null; saveMark(p.id,{rejected:true}); toast("Rejected and removed from the map"); };
 }
 async function roadDist(g,o){
   try{ const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${g.lon},${g.lat};${o.lon},${o.lat}?overview=false`); if(!r.ok) return null;
-    const j=await r.json(); const rt=j.routes&&j.routes[0]; if(!rt) return null;
-    return `≈ ${(rt.distance/1000).toFixed(1)} km by road`; }catch{ return null; }
+    const j=await r.json(); const rt=j.routes&&j.routes[0]; return rt? rt.distance/1000 : null; }catch{ return null; }
 }
 function placeOffice(){
   MAP.offices=MAP.offices||{};
@@ -873,7 +903,7 @@ function placeOffice(){
       try{ localStorage.setItem(OFFICE_KEY, JSON.stringify(loc)); }catch{}
       MAP.dirtyOffice=true; $("#mapSaveOffice").style.display=S.canWrite?"":"none";
       $("#mapStatus").textContent=S.canWrite?`${o.short||o.name} moved. Tap Save office pins to keep it for everyone.`:`${o.short||o.name} moved on this device. Enter the passcode to save it for everyone.`;
-      if(MAP.sel) selectPin(MAP.sel); render(); });
+      if(MAP.sel) selectPin(MAP.sel); render(); roadAll(); });
     MAP.offices[o.id]=m;
   }
 }
@@ -897,10 +927,10 @@ async function geocodeAll(){
     try{ await geocodeListing(p); }catch{}
     if(n%5===0) drawPins();
   }
-  MAP.busy=false; drawPins();
+  MAP.busy=false; drawPins(); roadAll();
   const L2=mapList(); const placed=L2.filter(p=>GEO["L:"+p.id]).length;
   if(!MAP.dirtyOffice) $("#mapStatus").textContent=`${placed} of ${L2.length} listings on the map.`;
-  if(todo.length) { render(); if(!MAP.fitted){ fitAll(); MAP.fitted=true; } }
+  if(todo.length) { render(); if(MAP.map && !MAP.fitted){ fitAll(); MAP.fitted=true; } }
 }
 window.mapShow=function(){
   if(!window.L){ $("#mapStatus").textContent="The map couldn't load. Check your connection and reload."; return; }
@@ -935,6 +965,7 @@ async function loadListings(){
   try{
     const [l,m]=await Promise.all([fetchJSON("data/listings.json"), fetchJSON("data/meta.json")]);
     S.props=l.listings||[]; S.status=m.status||null; S.runs=m.runs||[]; S.loaded.props=true; showGlobal("");
+    setTimeout(()=>{ try{ geocodeAll(); }catch{} }, 1500);
   }catch(e){ S.loaded.props=true; showGlobal("Couldn't load listings. Check your connection and reopen the page.","bad"); }
   render();
 }
