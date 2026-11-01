@@ -1,17 +1,56 @@
 {
   "status": {
-    "lastRunAt": "2026-10-31T19:16:28Z",
-    "lastSuccessAt": "2026-10-31T19:16:28Z",
+    "lastRunAt": "2026-11-01T02:32:03Z",
+    "lastSuccessAt": "2026-11-01T02:32:03Z",
     "lastStatus": "partial",
-    "lastSuccessRunId": "run-20261101-2",
-    "lastError": "Kaggadasapura flats page refused again; independent-house page used and Kaggadasapura listings were not marked as missed",
-    "nextRunAt": "2026-11-01T02:20:00Z",
+    "lastSuccessRunId": "run-20261101-3",
+    "lastError": "Kaggadasapura flats page refused (client error); only its independent-house page could be read, so Kaggadasapura listings were not marked as missed. Most new-listing detail pages could not be opened in this unattended run.",
+    "nextRunAt": "2026-11-02T02:20:00Z",
     "schedule": "Daily 7:50 AM IST",
     "sources": [
       "NoBroker"
     ]
   },
   "runs": [
+    {
+      "id": "run-20261101-3",
+      "trigger": "scheduled",
+      "startedAt": "2026-11-01T02:21:05Z",
+      "finishedAt": "2026-11-01T02:32:03Z",
+      "status": "partial",
+      "found": 65,
+      "newCount": 30,
+      "matchCount": 56,
+      "sources": [
+        "NoBroker (locality pages)"
+      ],
+      "localitiesSearched": [
+        "Mahadevapura",
+        "Kaggadasapura",
+        "Kadubeesanahalli",
+        "Doddanekundi",
+        "Hoodi",
+        "Brookefield",
+        "Kartik Nagar",
+        "Marathahalli",
+        "Bellandur"
+      ],
+      "localitiesFailed": [
+        "Kaggadasapura"
+      ],
+      "error": "Kaggadasapura flats page refused (client error); only its independent-house page could be read, so Kaggadasapura listings were not marked as missed. Most new-listing detail pages could not be opened in this unattended run.",
+      "report": {
+        "summary": "Daily run with the widened ₹30k–40k budget and new localities (Kartik Nagar, Marathahalli, Bellandur): 30 new 2 BHK listings, 56 active full matches. Best new picks: Friends Residency, Marathahalli (₹38k, lift, car and bike parking, but north-facing and the page says listed by broker), L M Celestial, Doddanekundi (₹40k, fully furnished) and Synapse Nest, Brookefield (₹40k). Several new Bellandur listings were found but fall outside the 30-minute commute limit. The Kaggadasapura flats page still could not be fetched.",
+        "top": [
+          "nobroker-8a9fbd827e523ff0017e52c6323d3ca0",
+          "nobroker-8a9f8e8395b6a9240195b6e0d3f40b07",
+          "nobroker-ff8081815e66cfa7015e6b7191327ac1",
+          "nobroker-8a9f82839b2b247f019b2c186bc72f08",
+          "nobroker-8aa9abc1a129e1e401a12a57c4bb5cb4"
+        ],
+        "needsConfirmation": "facing, parking, lift and water for most new listings (detail pages could not be opened); Friends Residency says listed by broker; Sangam Paradise (ff808181615a…) may duplicate an existing Sangam Paradise listing."
+      }
+    },
     {
       "id": "run-20261101-2",
       "startedAt": "2026-10-31T19:15:19Z",
@@ -190,8 +229,15 @@
         "minMin": 18
       }
     },
-    "maxRent": 35000,
+    "maxRent": 40000,
     "minRent": 30000,
+    "parking": [
+      "4-wheeler (car) parking",
+      "2-wheeler (bike) parking"
+    ],
+    "bhkTypes": [
+      "2 BHK"
+    ],
     "amenities": [
       "Gated community",
       "Lift",
@@ -202,25 +248,62 @@
       "No brokerage",
       "Lower deposit"
     ],
+    "updatedAt": "2026-10-31T22:08:03.224Z",
     "workplace": {
       "name": "EY GDS — Coral, Bagmane World Technology Centre (WTC)",
       "address": "Survey No 34/1–37/2, Marathahalli Outer Ring Road, Doddanekundi Village, Mahadevapura, Bengaluru 560048"
     },
     "furnishing": [
-      "Unfurnished",
-      "Semi furnished",
-      "Fully furnished"
+      "Semi furnished"
     ],
     "localities": [
-      "Kaggadasapura",
       "Mahadevapura",
+      "Kaggadasapura",
       "Kadubeesanahalli",
       "Doddanekundi",
       "Hoodi",
-      "Brookefield"
+      "Brookefield",
+      "Kartik Nagar",
+      "Marathahalli",
+      "Bellandur"
     ],
     "maxCommute": 30,
-    "propertyType": "2 BHK apartment",
+    "workplaces": [
+      {
+        "id": "ey",
+        "lat": 12.984863,
+        "lon": 77.695266,
+        "name": "EY GDS — Coral, Bagmane WTC",
+        "short": "EY Coral",
+        "approx": false,
+        "address": "Bagmane World Technology Centre, Outer Ring Road, Doddanekundi, Mahadevapura, Bengaluru 560048",
+        "plusCode": "XMMW+W4R Bengaluru"
+      },
+      {
+        "id": "rmz",
+        "lat": 12.9941,
+        "lon": 77.6611,
+        "name": "RMZ Infinity",
+        "short": "RMZ Infinity",
+        "approx": false,
+        "address": "Old Madras Road, Benniganahalli, Bengaluru 560016"
+      },
+      {
+        "id": "refyne",
+        "lat": 12.9185,
+        "lon": 77.678694,
+        "name": "Refyne India",
+        "short": "Refyne",
+        "approx": false,
+        "address": "3B, 3rd Floor, Prestige Pegasus, Sarjapur–Marathahalli Road, Haralur, Ambalipura, Bengaluru 560102"
+      }
+    ],
+    "propertyType": "2 BHK Apartment / Independent House/Villa / Gated Societies",
+    "propertyTypes": [
+      "Apartment",
+      "Independent House/Villa",
+      "Gated Societies"
+    ],
     "scheduleLabel": "7:50 AM IST",
     "searchEnabled": true
   },
