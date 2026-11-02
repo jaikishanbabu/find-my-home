@@ -1,17 +1,57 @@
 {
   "status": {
-    "lastRunAt": "2026-11-01T02:32:03Z",
-    "lastSuccessAt": "2026-11-01T02:32:03Z",
+    "lastRunAt": "2026-11-02T02:31:03Z",
+    "lastSuccessAt": "2026-11-02T02:31:03Z",
     "lastStatus": "partial",
-    "lastSuccessRunId": "run-20261101-3",
-    "lastError": "Kaggadasapura flats page refused (client error); only its independent-house page could be read, so Kaggadasapura listings were not marked as missed. Most new-listing detail pages could not be opened in this unattended run.",
-    "nextRunAt": "2026-11-02T02:20:00Z",
+    "lastSuccessRunId": "run-20261102",
+    "lastError": "Kaggadasapura flats page refused (client error); only its independent-house page could be read, so Kaggadasapura listings were not marked as missed. New-listing detail pages could not be opened in this unattended run.",
+    "nextRunAt": "2026-11-03T02:20:00Z",
     "schedule": "Daily 7:50 AM IST",
     "sources": [
       "NoBroker"
     ]
   },
   "runs": [
+    {
+      "id": "run-20261102",
+      "trigger": "scheduled",
+      "startedAt": "2026-11-02T02:21:41Z",
+      "finishedAt": "2026-11-02T02:31:03Z",
+      "status": "partial",
+      "found": 68,
+      "newCount": 6,
+      "matchCount": 49,
+      "sources": [
+        "NoBroker"
+      ],
+      "localitiesSearched": [
+        "Mahadevapura",
+        "Kadubeesanahalli",
+        "Doddanekundi",
+        "Hoodi",
+        "Brookefield",
+        "Kartik Nagar",
+        "Marathahalli",
+        "Bellandur",
+        "Kaggadasapura"
+      ],
+      "localitiesFailed": [
+        "Kaggadasapura"
+      ],
+      "error": "Kaggadasapura flats page refused (client error); only its independent-house page could be read, so Kaggadasapura listings were not marked as missed. New-listing detail pages could not be opened in this unattended run.",
+      "report": {
+        "summary": "6 new 2 BHK listings today; 3 are full matches. Best new picks: Colosseo Ventures, Marathahalli (₹36,000, low ₹50,000 deposit) and a standalone 2 BHK near SGR Dental College Rd, Marathahalli (₹30,000). Synapse Nest, Brookefield (₹40,000) looks like a second post for a flat already tracked. Kaggadasapura's flats page could not be read again, and no new-listing detail pages could be opened, so facing and parking are unconfirmed; 17 listings not seen for 3 days were marked gone.",
+        "top": [
+          "nobroker-ff80818159e91f8f0159e96f99f30ac3",
+          "nobroker-8a9f8a4393102a8801931030be590154",
+          "nobroker-8a9fd783890659f3018906a0043930db"
+        ],
+        "needsConfirmation": [
+          "Facing, parking, lift and gated status for all 6 new listings (detail pages not opened)",
+          "Whether Synapse Nest (Brookefield) new post duplicates the existing listing"
+        ]
+      }
+    },
     {
       "id": "run-20261101-3",
       "trigger": "scheduled",

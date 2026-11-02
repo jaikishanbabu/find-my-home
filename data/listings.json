@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-01T02:32:03Z",
+  "updatedAt": "2026-11-02T02:30:46Z",
   "listings": [
     {
       "id": "nobroker-8a9f8c838d9c621d018d9cc948c15458",
@@ -66,7 +66,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "power": "Generator backup",
       "baths": 2,
@@ -130,7 +130,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "checkNote": "Listed on the locality page on 31 Oct 2026, but the detail page could not be opened. It may have been taken down",
       "fingerprint": "houseofmahikha|30000|850",
@@ -189,7 +189,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "independenthouse5thcrossrdnearvvgrandregency|35000|1100",
       "missCount": 0
@@ -248,7 +248,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "pranaammalnadcastle|38000|1094",
       "missCount": 0
@@ -337,7 +337,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "aadityaadenclave|36000|1280",
       "missCount": 0
@@ -367,7 +367,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "prithviheightsapartment|39000|1300",
       "missCount": 0
@@ -394,10 +394,11 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
-      "lastUpdated": "2026-10-31T18:05:00Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
+      "lastUpdated": "2026-11-02T02:30:46Z",
       "fingerprint": "2ndmain4thcrossputtappalayout|27000|1200",
-      "missCount": 0
+      "missCount": 0,
+      "maintenance": 9
     },
     {
       "id": "nobroker-ff8081816938fdcd0169393a93ea1c22",
@@ -420,14 +421,14 @@
       "brokerage": 0,
       "brokerageText": "None (NoBroker owner listing)",
       "availability": "unconfirmed",
-      "status": "active",
+      "status": "gone",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
       "lastChecked": "2026-10-31T18:05:00Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "ashrayalayoutgarudacharpalyaneargopalannationalschool|35000|1000",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8aa9c3259eab4cff019eabc6db633e29",
@@ -450,14 +451,14 @@
       "brokerage": 0,
       "brokerageText": "None (NoBroker owner listing)",
       "availability": "unconfirmed",
-      "status": "active",
+      "status": "gone",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
       "lastChecked": "2026-10-31T18:05:00Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "sparrowmeridian|36000|1065",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-ff80818151002b1c015109d3d7883e5f",
@@ -480,14 +481,14 @@
       "brokerage": 0,
       "brokerageText": "None (NoBroker owner listing)",
       "availability": "unconfirmed",
-      "status": "active",
+      "status": "gone",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
       "lastChecked": "2026-10-31T18:05:00Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "udaynagarnearshrimaitrienglishschool|25000|990",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8a9fa483942565fc0194258d55300d10",
@@ -513,7 +514,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "phase2neargopalannationalschool|35000|750",
       "missCount": 0
@@ -542,7 +543,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "checkNote": "Listed on the locality page on 31 Oct 2026, but the detail page could not be opened. It may have been taken down",
       "fingerprint": "jproyal|30000|700",
@@ -575,7 +576,7 @@
       "security": "Gated community, 24/7 security",
       "water": "Water facility; rainwater harvesting",
       "availability": "unconfirmed",
-      "status": "active",
+      "status": "gone",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
       "lastChecked": "2026-10-31T18:05:00Z",
@@ -584,8 +585,8 @@
       "baths": 2,
       "checkNote": "Detail page opened 31 Oct 2026",
       "fingerprint": "muraleeravam|35000|1150",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8aa9ad7ea05be33101a05ca488170ce9",
@@ -608,14 +609,14 @@
       "brokerage": 0,
       "brokerageText": "None (NoBroker owner listing)",
       "availability": "unconfirmed",
-      "status": "active",
+      "status": "gone",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
       "lastChecked": "2026-10-31T18:05:00Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "annainilayam2ndmain4thcrossputtappalayout|30000|1200",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8aa9aed8a1575f8d01a157817d370aae",
@@ -641,7 +642,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "whitefieldmainrdkamadhenunagarbnarayanapuramahadevapura|25000|1200",
       "missCount": 0
@@ -674,7 +675,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "baths": 2,
       "floor": "1st floor",
@@ -703,14 +704,14 @@
       "brokerage": 0,
       "brokerageText": "None (NoBroker owner listing)",
       "availability": "unconfirmed",
-      "status": "active",
+      "status": "gone",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
       "lastChecked": "2026-10-31T18:05:00Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "independenthousekadubeesanahallinearthejunkfreecafe|32000|1000",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-ff8081816ce8b636016ceb8cec0305c8",
@@ -733,14 +734,14 @@
       "brokerage": 0,
       "brokerageText": "None (NoBroker owner listing)",
       "availability": "unconfirmed",
-      "status": "active",
+      "status": "gone",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
       "lastChecked": "2026-10-31T18:05:00Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "kadubeesanahallipanathurmainroad|28000|1200",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8a9fa9839a6c955d019a6cff7dfb1f65",
@@ -766,7 +767,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "bhoganahallirdnearparimalatrinityapts|25000|700",
       "missCount": 0
@@ -795,7 +796,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "no127panathurmainroadkadubeesanahalli560103|25000|950",
       "missCount": 0
@@ -821,14 +822,14 @@
       "brokerage": 0,
       "brokerageText": "None (NoBroker owner listing)",
       "availability": "unconfirmed",
-      "status": "active",
+      "status": "gone",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
       "lastChecked": "2026-10-31T18:05:00Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "aswathnagar|26000|1200",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8aa9b1c9a15916b301a159437a08169d",
@@ -916,7 +917,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "power": "Electric backup",
       "baths": 2,
@@ -953,7 +954,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "whitefieldrdseetharampalyahoodirdneargopalaninternationalschool|25500|800",
       "missCount": 0
@@ -982,7 +983,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "nearkrishnarajapurahoodimetrostation|25000|800",
       "missCount": 0
@@ -1008,14 +1009,14 @@
       "brokerage": 0,
       "brokerageText": "None (NoBroker owner listing)",
       "availability": "unconfirmed",
-      "status": "active",
+      "status": "gone",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
       "lastChecked": "2026-10-31T18:05:00Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "tigalarpalyabrookefield560066nearthubarahallibusstop|35000|950",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8a9f821375cfecbe0175d0c2b98469c2",
@@ -1043,7 +1044,8 @@
       "lastChecked": "2026-11-01T02:31:51Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "4thmainrdbemllayoutbrookefield|36000|700",
-      "missCount": 0
+      "missCount": 1,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8a9f95838e8e8c94018e8ec49bea1e7f",
@@ -1066,14 +1068,14 @@
       "brokerage": 0,
       "brokerageText": "None (NoBroker owner listing)",
       "availability": "unconfirmed",
-      "status": "active",
+      "status": "gone",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
       "lastChecked": "2026-10-31T18:05:00Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "17thcrossrdbemllayoutmainrdthubarahalli|37000|800",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-ff8081814d9f5a34014d9f8548a701b3",
@@ -1096,14 +1098,14 @@
       "brokerage": 0,
       "brokerageText": "None (NoBroker owner listing)",
       "availability": "unconfirmed",
-      "status": "active",
+      "status": "gone",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
       "lastChecked": "2026-10-31T18:05:00Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "dreammeadowsbrookefield|35000|700",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8aa9b2149fe04ab5019fe1a8ecc929ce",
@@ -1129,7 +1131,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "aecslayoutdblock|25000|750",
       "missCount": 0
@@ -1159,7 +1161,7 @@
       "parking": "Car",
       "security": "Gated security",
       "availability": "unconfirmed",
-      "status": "active",
+      "status": "gone",
       "firstSeen": "2026-10-31T18:05:00Z",
       "firstSeenRun": "run-20261031-initial",
       "lastChecked": "2026-10-31T18:05:00Z",
@@ -1168,8 +1170,8 @@
       "floor": "2nd floor",
       "checkNote": "Detail page opened 31 Oct 2026; description says the home is vacant",
       "fingerprint": "jayanthiresidency|32000|900",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8a9fc1827f63d618017f63e363120574",
@@ -1211,8 +1213,8 @@
       ],
       "checkNote": "Detail page opened 31 Oct 2026",
       "fingerprint": "parimalawinsomeapartment|30000|1250",
-      "missCount": 1,
-      "lastMissDate": "2026-11-01"
+      "missCount": 2,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-ff8081816483b0ba016483f5ddea3531",
@@ -1241,8 +1243,8 @@
       "lastChecked": "2026-10-31T18:05:00Z",
       "lastUpdated": "2026-10-31T18:05:00Z",
       "fingerprint": "aecslayoutnearcmrinstituteoftechnology|27000|800",
-      "missCount": 1,
-      "lastMissDate": "2026-11-01"
+      "missCount": 2,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8a9f848283bb8e910183bbce55a03508",
@@ -1259,7 +1261,7 @@
       "firstSeen": "2026-10-31T18:09:29Z",
       "firstSeenRun": "run-20261031",
       "furnishing": "Semi furnished",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
       "locality": "Doddanekundi",
       "maintenance": 3000,
@@ -1292,7 +1294,7 @@
       "firstSeen": "2026-10-31T18:09:29Z",
       "firstSeenRun": "run-20261031",
       "furnishing": "Unfurnished",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:09:29Z",
       "locality": "Hoodi",
       "maintenance": 0,
@@ -1337,7 +1339,7 @@
       "firstSeenRun": "run-20261031",
       "floor": "1st floor",
       "furnishing": "Semi furnished",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:09:29Z",
       "lift": true,
       "locality": "Doddanekundi",
@@ -1396,12 +1398,12 @@
       "society": "Kethana Residency",
       "source": "NoBroker",
       "sourceId": "8a9f90827d7fbfe2017d8038cda34356",
-      "status": "active",
+      "status": "gone",
       "tenants": "Family",
       "title": "2 BHK Apartment in Kethana Residency",
       "url": "https://www.nobroker.in/property/2-bhk-apartment-for-rent-in-kaggadasapura-bangalore-for-rs-36000/8a9f90827d7fbfe2017d8038cda34356/detail",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8a9f9303904ea3ad01904ea953800037",
@@ -1458,7 +1460,7 @@
       "firstSeen": "2026-10-31T18:09:29Z",
       "firstSeenRun": "run-20261031",
       "furnishing": "Fully furnished",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:09:29Z",
       "locality": "Doddanekundi",
       "maintenance": 1000,
@@ -1524,12 +1526,12 @@
       "rent": 25000,
       "source": "NoBroker",
       "sourceId": "8a9fab827eaf974e017eafce3c531b96",
-      "status": "active",
+      "status": "gone",
       "tenants": "All",
       "title": "2 BHK House in Doddanekundi",
       "url": "https://www.nobroker.in/property/2-bhk-apartment-for-rent-in-doddanekundi--bangalore-for-rs-25000/8a9fab827eaf974e017eafce3c531b96/detail",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8a9fad84975d5f4c01975d6c046303a2",
@@ -1556,7 +1558,7 @@
       "firstSeenRun": "run-20261031",
       "floor": "6th floor",
       "furnishing": "Semi furnished",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:09:29Z",
       "lift": true,
       "locality": "Kadubeesanahalli",
@@ -1598,12 +1600,12 @@
       "rent": 28000,
       "source": "NoBroker",
       "sourceId": "8a9fbb8278aa83fb0178aacd4ae11a81",
-      "status": "active",
+      "status": "gone",
       "tenants": "Family",
       "title": "2 BHK House in Doddanekkundi",
       "url": "https://www.nobroker.in/property/2-bhk-apartment-for-rent-in-doddanekkundi-bangalore-for-rs-28000/8a9fbb8278aa83fb0178aacd4ae11a81/detail",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8a9fcd82832f393801832f6182f902f4",
@@ -1621,7 +1623,7 @@
       "firstSeen": "2026-10-31T18:09:29Z",
       "firstSeenRun": "run-20261031",
       "furnishing": "Semi furnished",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:09:29Z",
       "locality": "Brookefield",
       "maintenance": 4000,
@@ -1648,15 +1650,15 @@
       "brokerage": 0,
       "brokerageText": "None (NoBroker owner listing)",
       "checkNote": "Detail page opened 31 Oct 2026; detail page shows deposit ₹3,50,000 but search card showed ₹2,00,000 — verify",
-      "deposit": 350000,
+      "deposit": 200000,
       "facing": "North",
       "fingerprint": "itplmainrdbrookefieldmallaecslayoutnearcosmosmall|35000|1100",
       "firstSeen": "2026-10-31T18:09:29Z",
       "firstSeenRun": "run-20261031",
       "floor": "1st floor",
       "furnishing": "Semi furnished",
-      "lastChecked": "2026-10-31T18:14:35Z",
-      "lastUpdated": "2026-10-31T18:09:29Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
+      "lastUpdated": "2026-11-02T02:30:46Z",
       "locality": "Brookefield",
       "maintenance": 1000,
       "parking": "Car",
@@ -1669,7 +1671,7 @@
       "tenants": "Family",
       "title": "2 BHK House in Brookefield (AECS Layout)",
       "url": "https://www.nobroker.in/property/2-bhk-apartment-for-rent-in-brookefield-bangalore-for-rs-35000/8a9ff28285e673cd0185e71c8631265c/detail",
-      "missCount": 2,
+      "missCount": 0,
       "lastMissDate": "2026-11-01"
     },
     {
@@ -1695,12 +1697,12 @@
       "rent": 38000,
       "source": "NoBroker",
       "sourceId": "8aa993ca9c796e32019c79c134df286b",
-      "status": "active",
+      "status": "gone",
       "tenants": "Family",
       "title": "2 BHK House in Brookefield (near Lemon Tree Hotel)",
       "url": "https://www.nobroker.in/property/2-bhk-apartment-for-rent-in--brookefield-bangalore-for-rs-38000/8aa993ca9c796e32019c79c134df286b/detail",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8aa9a0bca1711f1501a1719aed7348de",
@@ -1725,12 +1727,12 @@
       "rent": 25000,
       "source": "NoBroker",
       "sourceId": "8aa9a0bca1711f1501a1719aed7348de",
-      "status": "active",
+      "status": "gone",
       "tenants": "All",
       "title": "2 BHK House in Kadubeesanahalli",
       "url": "https://www.nobroker.in/property/2-bhk-apartment-for-rent-in-panathur-bangalore-for-rs-25000/8aa9a0bca1711f1501a1719aed7348de/detail",
-      "missCount": 2,
-      "lastMissDate": "2026-11-01"
+      "missCount": 3,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8aa9af56a1575f4b01a157e547a740d7",
@@ -1796,8 +1798,8 @@
       "tenants": "Family",
       "title": "2 BHK House in AECS Layout, Marathahalli",
       "url": "https://www.nobroker.in/property/2-bhk-apartment-for-rent-in-aecs-layout-marathahalli-bangalore-for-rs-32000/8aa9b206a081701701a0843ecd6623b1/detail",
-      "missCount": 1,
-      "lastMissDate": "2026-11-01"
+      "missCount": 2,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8aa9b5ad9c172786019c17ac326d26fe",
@@ -1842,7 +1844,7 @@
       "firstSeen": "2026-10-31T18:09:29Z",
       "firstSeenRun": "run-20261031",
       "furnishing": "Semi furnished",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T18:09:29Z",
       "locality": "Whitefield",
       "maintenance": 3800,
@@ -1884,8 +1886,8 @@
       "tenants": "Company",
       "title": "2 BHK House in Marathahalli (ITPL Main Rd)",
       "url": "https://www.nobroker.in/property/2-bhk-apartment-for-rent-in-marathahalli-bangalore-for-rs-26000/ff808181594aa267015955046c0a7b10/detail",
-      "missCount": 1,
-      "lastMissDate": "2026-11-01"
+      "missCount": 2,
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-ff8081815af9faba015afa14c5c90cd1",
@@ -1940,7 +1942,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T19:14:52Z",
       "firstSeenRun": "run-20261101",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
       "missCount": 0,
       "fingerprint": "doddanekkundinearsnehabakerykl58bakerscafe|25000|700"
@@ -1969,7 +1971,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T19:14:52Z",
       "firstSeenRun": "run-20261101",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
       "missCount": 0,
       "parking": "Bike and car",
@@ -2008,7 +2010,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T19:14:52Z",
       "firstSeenRun": "run-20261101",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
       "missCount": 0,
       "facing": "South-East",
@@ -2044,7 +2046,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T19:14:52Z",
       "firstSeenRun": "run-20261101",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
       "missCount": 0,
       "fingerprint": "gururajalayoutnearsribalajimedicalandsurgicals|28000|900"
@@ -2073,7 +2075,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T19:14:52Z",
       "firstSeenRun": "run-20261101",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
       "missCount": 0,
       "fingerprint": "himagirienclave1ablock|27000|700"
@@ -2102,7 +2104,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T19:14:52Z",
       "firstSeenRun": "run-20261101",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
       "missCount": 0,
       "fingerprint": "12thcrosspragathilayoutdoddanekundineartotalmallandshoppersstop|25000|1100"
@@ -2132,7 +2134,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T19:14:52Z",
       "firstSeenRun": "run-20261101",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
       "missCount": 0,
       "facing": "North",
@@ -2174,7 +2176,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T19:14:52Z",
       "firstSeenRun": "run-20261101",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
       "missCount": 0,
       "fingerprint": "vibhutipuraextensionnearshrinanjundeshwaraswamitemple|25000|800"
@@ -2203,7 +2205,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T19:14:52Z",
       "firstSeenRun": "run-20261101",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
       "missCount": 0,
       "checkNote": "Detail page could not be opened on 1 Nov 2026; may have been taken down",
@@ -2236,7 +2238,7 @@
       "firstSeenRun": "run-20261101",
       "lastChecked": "2026-10-31T19:16:28Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
-      "missCount": 1,
+      "missCount": 2,
       "facing": "East",
       "parking": "Bike and car",
       "lift": true,
@@ -2253,7 +2255,7 @@
       ],
       "checkNote": "Detail page opened 1 Nov 2026. Rent negotiable; above max budget.",
       "fingerprint": "ashirwaadresidency|38000|850",
-      "lastMissDate": "2026-11-01"
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8aa9b1009ac3b1d7019ac3ed976d1acd",
@@ -2281,9 +2283,9 @@
       "firstSeenRun": "run-20261101",
       "lastChecked": "2026-10-31T19:16:28Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
-      "missCount": 1,
+      "missCount": 2,
       "fingerprint": "bnarayanapuranearindiracanteen|28000|700",
-      "lastMissDate": "2026-11-01"
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-ff808181658424e7016584ab144f4045",
@@ -2312,7 +2314,7 @@
       "firstSeenRun": "run-20261101",
       "lastChecked": "2026-10-31T19:16:28Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
-      "missCount": 1,
+      "missCount": 2,
       "facing": "North",
       "parking": "Bike and car",
       "lift": true,
@@ -2333,7 +2335,7 @@
       ],
       "checkNote": "Detail page opened 1 Nov 2026. Rent marked negotiable.",
       "fingerprint": "amruthasparklingnestapartment|34000|1140",
-      "lastMissDate": "2026-11-01"
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8a9fb083957949e7019579b242b03255",
@@ -2361,10 +2363,10 @@
       "firstSeenRun": "run-20261101",
       "lastChecked": "2026-10-31T19:16:28Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
-      "missCount": 1,
+      "missCount": 2,
       "checkNote": "Detail page could not be opened on 1 Nov 2026; may have been taken down",
       "fingerprint": "laxmisagarlayoutnearstannespucollege|31000|1200",
-      "lastMissDate": "2026-11-01"
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8aa9a79fa188148d01a18a1bb2676c9a",
@@ -2390,7 +2392,7 @@
       "status": "active",
       "firstSeen": "2026-10-31T19:14:52Z",
       "firstSeenRun": "run-20261101",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-10-31T19:14:52Z",
       "missCount": 0,
       "checkNote": "Detail page could not be opened on 1 Nov 2026; may have been taken down",
@@ -2423,8 +2425,9 @@
       "firstSeenRun": "run-20261101-3",
       "lastChecked": "2026-11-01T02:31:51Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
-      "missCount": 0,
-      "fingerprint": "slssunrise|44000|1143"
+      "missCount": 1,
+      "fingerprint": "slssunrise|44000|1143",
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8a9f8e8395b6a9240195b6e0d3f40b07",
@@ -2452,7 +2455,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "lmcelestial|40000|1200"
@@ -2483,7 +2486,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "chinnuparadiseapartment|40000|1134"
@@ -2513,7 +2516,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "sangamparadiseapartment|30000|950",
@@ -2544,7 +2547,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "swamyvivekanadaashramaxpv9w7gitplwhitefieldroadlistedashoody|40000|790"
@@ -2573,7 +2576,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "basavannanagarmainrdnearflorencepublicschoolhoodi|40000|1850"
@@ -2604,7 +2607,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "synapsenest|40000|1004"
@@ -2635,8 +2638,9 @@
       "firstSeenRun": "run-20261101-3",
       "lastChecked": "2026-11-01T02:31:51Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
-      "missCount": 0,
-      "fingerprint": "aecslayoutdblocknearageacindiabangalorecenterandnisargachildrenparkbrookefield|42000|1100"
+      "missCount": 1,
+      "fingerprint": "aecslayoutdblocknearageacindiabangalorecenterandnisargachildrenparkbrookefield|42000|1100",
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8a9f9b8277ec9cf60177ecd384961a62",
@@ -2664,7 +2668,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "sharadamansion|32000|800"
@@ -2679,7 +2683,7 @@
       "address": "Marathahalli",
       "society": "Ittina Akya",
       "bhk": 2,
-      "rent": 30000,
+      "rent": 32000,
       "maintenance": 2500,
       "deposit": 100000,
       "areaSqft": 700,
@@ -2694,8 +2698,8 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
-      "lastUpdated": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
+      "lastUpdated": "2026-11-02T02:30:46Z",
       "missCount": 0,
       "fingerprint": "ittinaakya|30000|700"
     },
@@ -2724,7 +2728,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "hemprathikparadise|30000|750"
@@ -2772,7 +2776,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "friendsresidency|38000|1100"
@@ -2804,8 +2808,9 @@
       "firstSeenRun": "run-20261101-3",
       "lastChecked": "2026-11-01T02:31:51Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
-      "missCount": 0,
-      "fingerprint": "subikshacourette|42000|1194"
+      "missCount": 1,
+      "fingerprint": "subikshacourette|42000|1194",
+      "lastMissDate": "2026-11-02"
     },
     {
       "id": "nobroker-8aa9a6bf9ffc1233019ffc72632a26d0",
@@ -2832,7 +2837,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "twinklingblooms|28000|1100"
@@ -2863,7 +2868,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "sarithaelegance|35000|1263"
@@ -2892,7 +2897,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "tulasitheatreroadmarathahalli|26000|1150"
@@ -2921,7 +2926,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "sarjapurouterringrdnearbiryanizonemarathahalli|30000|850"
@@ -2951,7 +2956,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "sripristineapartment|43000|1200"
@@ -2981,7 +2986,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "ajanthapresidency|40000|1100"
@@ -3011,7 +3016,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "shreeduggalammasetunearkesarwalindiabellandur|25000|550"
@@ -3041,7 +3046,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "sreejaresidency|38000|1110"
@@ -3071,7 +3076,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "srinivasadiamond|40000|1150"
@@ -3101,7 +3106,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "lnresidency|37000|1050"
@@ -3130,7 +3135,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "ecoworldetvbellandur|26000|1000"
@@ -3160,7 +3165,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "parkviewresidency|42000|1178"
@@ -3190,7 +3195,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "blparadise|36000|1150"
@@ -3219,7 +3224,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "3rdacrossrdbehindcentralmallbellandur|25000|900"
@@ -3249,7 +3254,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "4thcrosssaraswathinagarmahadevapura|30000|1200"
@@ -3279,7 +3284,7 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "8thcrossmahadevapura|36000|1200"
@@ -3309,10 +3314,198 @@
       "status": "active",
       "firstSeen": "2026-11-01T02:31:51Z",
       "firstSeenRun": "run-20261101-3",
-      "lastChecked": "2026-11-01T02:31:51Z",
+      "lastChecked": "2026-11-02T02:30:46Z",
       "lastUpdated": "2026-11-01T02:31:51Z",
       "missCount": 0,
       "fingerprint": "ranganathalayoutmahadevapura|32000|1200"
+    },
+    {
+      "id": "nobroker-8a9fa58278968f24017896e8eb1c4395",
+      "title": "2 BHK Apartment in SLS Sunrise",
+      "source": "NoBroker",
+      "url": "https://www.nobroker.in/property/2-bhk-apartment-for-rent-in-kadubeesanahalli-bangalore-for-rs-42000/8a9fa58278968f24017896e8eb1c4395/detail",
+      "sourceId": "8a9fa58278968f24017896e8eb1c4395",
+      "locality": "Kadubeesanahalli",
+      "address": "Panathur (listed under Kadubeesanahalli)",
+      "society": "SLS Sunrise",
+      "rent": 42000,
+      "maintenance": 5000,
+      "deposit": 200000,
+      "areaSqft": 1200,
+      "furnishing": "Semi furnished",
+      "propertyType": "Apartment",
+      "tenants": "All",
+      "availableFrom": "Ready to move",
+      "bhk": 2,
+      "areaType": "built-up",
+      "brokerage": 0,
+      "brokerageText": "None (NoBroker owner listing)",
+      "availability": "unconfirmed",
+      "status": "active",
+      "firstSeen": "2026-11-02T02:30:46Z",
+      "firstSeenRun": "run-20261102",
+      "lastChecked": "2026-11-02T02:30:46Z",
+      "lastUpdated": "2026-11-02T02:30:46Z",
+      "missCount": 0,
+      "checkNote": "Detail page could not be opened on 2 Nov 2026; may have been taken down",
+      "fingerprint": "slssunrise|42000|1200",
+      "dupOf": "nobroker-8aa9b184a17dc7ba01a1807dd7c97b38",
+      "dupReason": "Same society (SLS Sunrise) with rent within 5% (₹44,000 vs ₹42,000)"
+    },
+    {
+      "id": "nobroker-8a9f8c8370473cf901704d11e2015f14",
+      "title": "2 BHK Apartment in VKC Chourasia Manor Phase 1",
+      "source": "NoBroker",
+      "url": "https://www.nobroker.in/property/2-bhk-apartment-for-rent-in-kadubeesanahalli-bangalore-for-rs-39000/8a9f8c8370473cf901704d11e2015f14/detail",
+      "sourceId": "8a9f8c8370473cf901704d11e2015f14",
+      "locality": "Kadubeesanahalli",
+      "address": "Kaverappa Layout, Kadubeesanahalli",
+      "society": "VKC Chourasia Manor Phase 1",
+      "rent": 39000,
+      "maintenance": 4000,
+      "deposit": 125000,
+      "areaSqft": 1211,
+      "furnishing": "Semi furnished",
+      "propertyType": "Apartment",
+      "tenants": "All",
+      "availableFrom": "Ready to move",
+      "bhk": 2,
+      "areaType": "built-up",
+      "brokerage": 0,
+      "brokerageText": "None (NoBroker owner listing)",
+      "availability": "unconfirmed",
+      "status": "active",
+      "firstSeen": "2026-11-02T02:30:46Z",
+      "firstSeenRun": "run-20261102",
+      "lastChecked": "2026-11-02T02:30:46Z",
+      "lastUpdated": "2026-11-02T02:30:46Z",
+      "missCount": 0,
+      "checkNote": "Detail page could not be opened on 2 Nov 2026; may have been taken down",
+      "fingerprint": "vkcchourasiamanorphase1|39000|1211"
+    },
+    {
+      "id": "nobroker-8a9fd783890659f3018906a0043930db",
+      "title": "2 BHK Apartment in Synapse Nest, Brookefield",
+      "source": "NoBroker",
+      "url": "https://www.nobroker.in/property/2-bhk-apartment-for-rent-in-brookefield-bangalore-for-rs-40000/8a9fd783890659f3018906a0043930db/detail",
+      "sourceId": "8a9fd783890659f3018906a0043930db",
+      "locality": "Brookefield",
+      "address": "ITPL Main Rd, BEML Layout, Brookefield, Bengaluru, Karnataka 560037",
+      "society": "Synapse Nest, Brookefield",
+      "rent": 40000,
+      "maintenance": 5000,
+      "deposit": 100000,
+      "areaSqft": 1004,
+      "furnishing": "Semi furnished",
+      "propertyType": "Apartment",
+      "tenants": "Family",
+      "availableFrom": "01-Dec-2026",
+      "bhk": 2,
+      "areaType": "built-up",
+      "brokerage": 0,
+      "brokerageText": "None (NoBroker owner listing)",
+      "availability": "unconfirmed",
+      "status": "active",
+      "firstSeen": "2026-11-02T02:30:46Z",
+      "firstSeenRun": "run-20261102",
+      "lastChecked": "2026-11-02T02:30:46Z",
+      "lastUpdated": "2026-11-02T02:30:46Z",
+      "missCount": 0,
+      "checkNote": "Detail page could not be opened on 2 Nov 2026; may have been taken down",
+      "fingerprint": "synapsenestbrookefield|40000|1004",
+      "dupOf": "nobroker-ff8081815e66cfa7015e6b7191327ac1",
+      "dupReason": "Same society (Synapse Nest) with the same rent (₹40,000)"
+    },
+    {
+      "id": "nobroker-ff80818159e91f8f0159e96f99f30ac3",
+      "title": "2 BHK Apartment in Colosseo Ventures",
+      "source": "NoBroker",
+      "url": "https://www.nobroker.in/property/2-bhk-apartment-for-rent-in-marathahalli-bangalore-for-rs-36000/ff80818159e91f8f0159e96f99f30ac3/detail",
+      "sourceId": "ff80818159e91f8f0159e96f99f30ac3",
+      "locality": "Marathahalli",
+      "address": "2nd Cross Chowdeshwari Temple Road, Marathahalli",
+      "society": "Colosseo Ventures",
+      "rent": 36000,
+      "maintenance": 3000,
+      "deposit": 50000,
+      "areaSqft": 1300,
+      "furnishing": "Semi furnished",
+      "propertyType": "Apartment",
+      "tenants": "All",
+      "availableFrom": "02-Nov-2026",
+      "bhk": 2,
+      "areaType": "built-up",
+      "brokerage": 0,
+      "brokerageText": "None (NoBroker owner listing)",
+      "availability": "unconfirmed",
+      "status": "active",
+      "firstSeen": "2026-11-02T02:30:46Z",
+      "firstSeenRun": "run-20261102",
+      "lastChecked": "2026-11-02T02:30:46Z",
+      "lastUpdated": "2026-11-02T02:30:46Z",
+      "missCount": 0,
+      "checkNote": "Detail page could not be opened on 2 Nov 2026; may have been taken down",
+      "fingerprint": "colosseoventures|36000|1300"
+    },
+    {
+      "id": "nobroker-8aa9b2f0a1952b3801a195cc6e6262e6",
+      "title": "2 BHK Apartment in ABC Quick Create",
+      "source": "NoBroker",
+      "url": "https://www.nobroker.in/property/2-bhk-apartment-for-rent-in-marathahalli-bangalore-for-rs-27000/8aa9b2f0a1952b3801a195cc6e6262e6/detail",
+      "sourceId": "8aa9b2f0a1952b3801a195cc6e6262e6",
+      "locality": "Marathahalli",
+      "address": "Marathahalli, Bangalore, Karnataka 560037",
+      "society": "ABC Quick Create",
+      "rent": 27000,
+      "deposit": 150000,
+      "areaSqft": 1050,
+      "furnishing": "Fully furnished",
+      "propertyType": "Apartment",
+      "tenants": "Family",
+      "availableFrom": "07-Dec-2026",
+      "bhk": 2,
+      "areaType": "built-up",
+      "brokerage": 0,
+      "brokerageText": "None (NoBroker owner listing)",
+      "availability": "unconfirmed",
+      "status": "active",
+      "firstSeen": "2026-11-02T02:30:46Z",
+      "firstSeenRun": "run-20261102",
+      "lastChecked": "2026-11-02T02:30:46Z",
+      "lastUpdated": "2026-11-02T02:30:46Z",
+      "missCount": 0,
+      "checkNote": "Detail page could not be opened on 2 Nov 2026; may have been taken down",
+      "fingerprint": "abcquickcreate|27000|1050"
+    },
+    {
+      "id": "nobroker-8a9f8a4393102a8801931030be590154",
+      "title": "2 BHK Flat in Standalone Building, Marathahalli",
+      "source": "NoBroker",
+      "url": "https://www.nobroker.in/property/2-bhk-apartment-for-rent-in-marathahalli-bangalore-for-rs-30000/8a9f8a4393102a8801931030be590154/detail",
+      "sourceId": "8a9f8a4393102a8801931030be590154",
+      "locality": "Marathahalli",
+      "address": "SGR Dental College Rd, Maruthi Layout, near Vishal Sweets And Restaurant, Marathahalli",
+      "rent": 30000,
+      "maintenance": 0,
+      "deposit": 100000,
+      "areaSqft": 820,
+      "furnishing": "Semi furnished",
+      "propertyType": "Standalone Building",
+      "tenants": "All",
+      "availableFrom": "Ready to move",
+      "bhk": 2,
+      "areaType": "built-up",
+      "brokerage": 0,
+      "brokerageText": "None (NoBroker owner listing)",
+      "availability": "unconfirmed",
+      "status": "active",
+      "firstSeen": "2026-11-02T02:30:46Z",
+      "firstSeenRun": "run-20261102",
+      "lastChecked": "2026-11-02T02:30:46Z",
+      "lastUpdated": "2026-11-02T02:30:46Z",
+      "missCount": 0,
+      "checkNote": "Detail page could not be opened on 2 Nov 2026; may have been taken down",
+      "fingerprint": "sgrdentalcollegerdmaruthilayoutnearvishalsweetsandrestaurantmarathahalli|30000|820"
     }
   ]
 }
