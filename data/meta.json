@@ -1,17 +1,58 @@
 {
   "status": {
-    "lastRunAt": "2026-11-02T02:31:03Z",
-    "lastSuccessAt": "2026-11-02T02:31:03Z",
+    "lastRunAt": "2026-11-03T02:31:38Z",
+    "lastSuccessAt": "2026-11-03T02:31:38Z",
     "lastStatus": "partial",
-    "lastSuccessRunId": "run-20261102",
-    "lastError": "Kaggadasapura flats page refused (client error); only its independent-house page could be read, so Kaggadasapura listings were not marked as missed. New-listing detail pages could not be opened in this unattended run.",
-    "nextRunAt": "2026-11-03T02:20:00Z",
+    "lastSuccessRunId": "run-20261103",
+    "lastError": "Kaggadasapura flats page refused (client error); only its independent-house page could be read, so Kaggadasapura listings were not marked as missed. 4 of 5 new-listing detail pages could not be opened.",
+    "nextRunAt": "2026-11-04T02:20:00Z",
     "schedule": "Daily 7:50 AM IST",
     "sources": [
       "NoBroker"
     ]
   },
   "runs": [
+    {
+      "id": "run-20261103",
+      "trigger": "scheduled",
+      "startedAt": "2026-11-03T02:21:00Z",
+      "finishedAt": "2026-11-03T02:31:38Z",
+      "status": "partial",
+      "found": 67,
+      "newCount": 5,
+      "matchCount": 47,
+      "sources": [
+        "NoBroker"
+      ],
+      "localitiesSearched": [
+        "Mahadevapura",
+        "Kaggadasapura",
+        "Kadubeesanahalli",
+        "Doddanekundi",
+        "Hoodi",
+        "Brookefield",
+        "Kartik Nagar",
+        "Marathahalli",
+        "Bellandur"
+      ],
+      "localitiesFailed": [
+        "Kaggadasapura"
+      ],
+      "error": "Kaggadasapura flats page refused (client error); only its independent-house page could be read, so Kaggadasapura listings were not marked as missed. 4 of 5 new-listing detail pages could not be opened.",
+      "report": {
+        "summary": "5 new 2 BHK listings today; 3 are full matches. Best new picks: Mahaveer Regal, Hoodi (₹35,000, ₹1.2 lakh deposit), a standalone 2 BHK on Doddanekundi Main Rd, Pragathi Layout (₹40,000, ₹1 lakh deposit) and an independent house in Gururaja Layout, Doddanekundi (₹30,000). The two new Kaggadasapura houses (₹25,000–26,000) are below budget, and one is shown on its detail page as a broker listing. Kaggadasapura's flats page could not be read again and only 1 of 5 detail pages opened, so facing and parking are mostly unconfirmed; 8 listings not seen for 3 days were marked gone.",
+        "top": [
+          "nobroker-8a9fe18284bde3930184be08e06b194d",
+          "nobroker-8aa9a475a180922501a1815c514e7f1e",
+          "nobroker-8aa9b3f4a13ffc5a01a140d7ff8d4b06"
+        ],
+        "needsConfirmation": [
+          "Facing, parking, lift and gated status for 4 of the 5 new listings (detail pages not opened)",
+          "Whether the Kaggadasapura house on 6th G Cross is an owner or broker listing (detail page says broker)",
+          "Rent for two existing houses shown at different prices on different pages (Kaggadasapura 5th Cross, Doddanekundi Pragathi Layout)"
+        ]
+      }
+    },
     {
       "id": "run-20261102",
       "trigger": "scheduled",
